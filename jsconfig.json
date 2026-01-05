@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    // Asegura que VS Code y otras herramientas entiendan el JSX de React
+    "jsx": "react-jsx" 
+  },
+  "include": ["src/**/*"]
+}

@@ -1,0 +1,110 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+/* Configurar dark mode con selector de clase */
+@variant dark (&:where(.dark, .dark *));
+
+/* Variables para modo oscuro */
+:root {
+  --background: 255 255 255;
+  --foreground: 17 24 39;
+}
+
+.dark {
+  --background: 17 24 39;
+  --foreground: 255 255 255;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes slowZoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.animate-slow-zoom {
+  animation: slowZoom 20s ease-in-out infinite alternate;
+}
+
+/* Animaciones para Landing */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+/* Animación de barras del gráfico */
+@keyframes barGrow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.animate-bar-1 { animation: barGrow 0.6s ease-out 0.1s forwards; transform-origin: bottom; }
+.animate-bar-2 { animation: barGrow 0.6s ease-out 0.2s forwards; transform-origin: bottom; }
+.animate-bar-3 { animation: barGrow 0.6s ease-out 0.3s forwards; transform-origin: bottom; }
+.animate-bar-4 { animation: barGrow 0.6s ease-out 0.4s forwards; transform-origin: bottom; }
+.animate-bar-5 { animation: barGrow 0.6s ease-out 0.5s forwards; transform-origin: bottom; }
+
+/* SweetAlert2 - Z-index alto para aparecer sobre modales de Radix UI */
+.swal2-container {
+  z-index: 99999 !important;
+}
+
+.swal2-popup {
+  z-index: 99999 !important;
+}
+
+/* Asegurar que el backdrop de SweetAlert2 esté sobre otros overlays */
+.swal2-backdrop-show {
+  z-index: 99998 !important;
+}
+
+/* Prevenir traducción automática del navegador */
+.notranslate {
+  translate: no;
+}
