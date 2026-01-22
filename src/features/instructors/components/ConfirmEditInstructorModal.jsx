@@ -6,7 +6,7 @@ import { Save } from "lucide-react";
 export default function ConfirmEditInstructorModal({ isOpen, onClose, onConfirm, changes, instructor }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-4xl">
         <div className="flex items-center gap-3 pb-4 border-b dark:border-gray-700">
           <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
             <Save className="w-5 h-5 text-blue-600 dark:text-blue-400" />

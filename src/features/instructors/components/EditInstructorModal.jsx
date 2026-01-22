@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ConfirmEditInstructorModal from "./ConfirmEditInstructorModal";
-import { Dialog } from "@/components/ui/Dialog";
-import { DialogTitle } from "@/components/ui/DialogTitle";
+import { Dialog, DialogTitle } from "@/components/ui/Dialog";
+import { DialogDescription } from "@/components/ui/DialogDescription";
 import { X, Edit, Save, Lock } from "lucide-react";
 import { showAlert, showToast } from "@/shared/notifications";
 import { useInstructoresMutations } from "../hooks/UseInstructors";
@@ -119,30 +119,33 @@ function EditInstructorForm({ instructor, onClose, onSuccess, catalogos, isOpen 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogTitle>
-          Editar Instructor
-        </DialogTitle>
-        {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b dark:border-gray-700 gap-4">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg shrink-0">
-              <Edit className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+      <div className="w-full h-full flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-6">
+          <DialogTitle className="sr-only">Editar Instructor</DialogTitle>
+          <DialogDescription className="sr-only">Formulario para editar los datos del instructor.</DialogDescription>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Editar Instructor
+          </h2>
+          {/* Header */}
+          <div className="flex items-start justify-between pb-4 border-b dark:border-gray-700 gap-4 mb-6">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg shrink-0">
+                <Edit className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                  {instructor.nombre} {instructor.apellidos}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                {instructor.nombre} {instructor.apellidos}
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors shrink-0"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors shrink-0"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           {/* Documento (no editable) */}
@@ -396,6 +399,7 @@ function EditInstructorForm({ instructor, onClose, onSuccess, catalogos, isOpen 
             </button>
           </div>
         </form>
+        </div>
       </div>
       <ConfirmEditInstructorModal
         isOpen={showConfirm}

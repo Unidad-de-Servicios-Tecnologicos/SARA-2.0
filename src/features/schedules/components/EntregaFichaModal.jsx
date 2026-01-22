@@ -90,26 +90,27 @@ export default function EntregaFichaModal({ isOpen, onClose, fichaCode = "" }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel}>
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center gap-3 pb-4 border-b dark:border-gray-700 shrink-0">
-          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-            <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+      <div className="w-full h-full flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* Header */}
+          <div className="flex items-center gap-3 pb-4 border-b dark:border-gray-700 mb-6">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Entrega de Ficha
+              </h2>
+              {fichaCode && (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Ficha: {fichaCode}
+                </p>
+              )}
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Entrega de Ficha
-            </h2>
-            {fichaCode && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Ficha: {fichaCode}
-              </p>
-            )}
-          </div>
-        </div>
 
-        {/* Formulario - Scrollable */}
-        <div className="flex-1 overflow-y-auto mt-6 space-y-4 px-6 py-4">
+          {/* Formulario - Scrollable */}
+          <div className="space-y-4">
           {/* Fecha de entrega */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -206,6 +207,7 @@ export default function EntregaFichaModal({ isOpen, onClose, fichaCode = "" }) {
             <FileCheck className="w-4 h-4" />
             Registrar Ficha
           </button>
+          </div>
         </div>
       </div>
     </Dialog>

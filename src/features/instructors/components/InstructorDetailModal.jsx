@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { DialogTitle } from "@/components/ui/DialogTitle";
 import {
   X,
@@ -28,6 +28,9 @@ import { useFichasInstructor, useNovedadesInstructor } from "../hooks/UseInstruc
 import { ExportService } from "../services/ExportService";
 import { showToast } from "@/shared/notifications";
 
+/* =======================
+   CONFIGURACIÓN DE ESTADOS
+======================= */
 // Configuración de estados
 const getEstadoConfig = (estado) => {
   const configs = {
@@ -73,6 +76,9 @@ const getVinculacionConfig = (tipo) => {
   return configs[tipo] || configs.planta;
 };
 
+/* =======================
+   TABS DEL MODAL
+======================= */
 // Tabs
 const TABS = [
   { id: "info", label: "Información", icon: User },
@@ -81,6 +87,9 @@ const TABS = [
   { id: "historial", label: "Historial", icon: History },
 ];
 
+/* =======================
+   COMPONENTE MODAL
+======================= */
 export default function InstructorDetailModal({ isOpen, onClose, instructor, onEdit }) {
   const [activeTab, setActiveTab] = useState("info");
   const [isExporting, setIsExporting] = useState(false);
@@ -89,6 +98,9 @@ export default function InstructorDetailModal({ isOpen, onClose, instructor, onE
 
   if (!instructor) return null;
 
+  /* =======================
+     EXPORTAR
+  ======================= */
   // Función para exportar instructor
   const handleExportPDF = async () => {
     try {
@@ -116,6 +128,9 @@ export default function InstructorDetailModal({ isOpen, onClose, instructor, onE
     return "text-green-600 bg-green-100";
   };
 
+  /* =======================
+     TAB INFORMACIÓN
+  ======================= */
   const renderInfoTab = () => (
     <div className="space-y-6">
       {/* Datos personales */}
@@ -280,6 +295,9 @@ export default function InstructorDetailModal({ isOpen, onClose, instructor, onE
     </div>
   );
 
+  /* =======================
+     TAB FICHAS ASIGNADAS
+  ======================= */
   const renderFichasTab = () => (
     <div className="space-y-3">
       {loadingFichas ? (
@@ -321,6 +339,9 @@ export default function InstructorDetailModal({ isOpen, onClose, instructor, onE
     </div>
   );
 
+  /* =======================
+     TAB NOVEDADES
+  ======================= */
   const renderNovedadesTab = () => (
     <div className="space-y-3">
       {loadingNovedades ? (
@@ -375,6 +396,9 @@ export default function InstructorDetailModal({ isOpen, onClose, instructor, onE
     </div>
   );
 
+  /* =======================
+     TAB HISTORIAL
+  ======================= */
   const renderHistorialTab = () => (
     <div className="space-y-3">
       {instructor.historialAsignaciones?.length > 0 ? (
@@ -408,14 +432,18 @@ export default function InstructorDetailModal({ isOpen, onClose, instructor, onE
     </div>
   );
 
+  /* =======================
+     RENDER
+  ======================= */
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
-      <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between p-4 pb-4 border-b dark:border-gray-700 gap-4">
           <div className="flex items-center gap-4 min-w-0 flex-1">
             {/* Avatar */}
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
+            <div className="w-14 h-14 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
               {instructor.nombre?.charAt(0)}{instructor.apellidos?.charAt(0)}
             </div>
             <div className="min-w-0">
@@ -494,6 +522,7 @@ export default function InstructorDetailModal({ isOpen, onClose, instructor, onE
           {activeTab === "historial" && renderHistorialTab()}
         </div>
       </div>
+      </DialogContent>
     </Dialog>
   );
 }

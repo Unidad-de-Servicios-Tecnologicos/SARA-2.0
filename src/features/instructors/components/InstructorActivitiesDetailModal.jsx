@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { DialogTitle } from "@/components/ui/DialogTitle";
 import {
   X,
@@ -18,7 +18,9 @@ import {
 import { ExportService } from "../services/ExportService";
 import { showToast } from "@/shared/notifications";
 
-// Configuración de estados
+/* =======================
+   CONFIGURACIÓN DE ESTADOS
+======================= */
 const getEstadoConfig = (estado) => {
   const configs = {
     "en curso": {
@@ -43,7 +45,9 @@ const getEstadoConfig = (estado) => {
   return configs[estado] || configs["en curso"];
 };
 
-// Tabs
+/* =======================
+   TABS DEL MODAL
+======================= */
 const TABS = [
   { id: "resumen", label: "Resumen", icon: BarChart3 },
   { id: "detalle", label: "Detalle", icon: BookOpen },
@@ -51,6 +55,9 @@ const TABS = [
   { id: "aprendices", label: "Aprendices", icon: Users },
 ];
 
+/* =======================
+   COMPONENTE MODAL
+======================= */
 export default function InstructorActivitiesDetailModal({
   isOpen,
   onClose,
@@ -63,6 +70,9 @@ export default function InstructorActivitiesDetailModal({
 
   if (!activity || !instructor) return null;
 
+  /* =======================
+     EXPORTAR
+  ======================= */
   const handleExportPDF = async () => {
     try {
       setIsExporting(true);
@@ -83,6 +93,9 @@ export default function InstructorActivitiesDetailModal({
     ? Math.round((activity.horasCompletadas / activity.horasTotal) * 100)
     : 0;
 
+  /* =======================
+     TAB RESUMEN
+  ======================= */
   const renderResumenTab = () => (
     <div className="space-y-6">
       {/* Información general */}
@@ -213,6 +226,9 @@ export default function InstructorActivitiesDetailModal({
     </div>
   );
 
+  /* =======================
+     TAB DETALLE
+  ======================= */
   const renderDetalleTab = () => (
     <div className="space-y-4">
       <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
@@ -254,6 +270,9 @@ export default function InstructorActivitiesDetailModal({
     </div>
   );
 
+  /* =======================
+     TAB HORARIOS
+  ======================= */
   const renderHorariosTab = () => (
     <div className="space-y-3">
       {(activity.horarios || []).length > 0 ? (
@@ -293,6 +312,9 @@ export default function InstructorActivitiesDetailModal({
     </div>
   );
 
+  /* =======================
+     TAB APRENDICES
+  ======================= */
   const renderAprendicesTab = () => (
     <div className="space-y-3">
       {(activity.aprendices || []).length > 0 ? (
@@ -302,7 +324,7 @@ export default function InstructorActivitiesDetailModal({
             className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white text-sm font-bold">
                 {aprendiz.nombre?.charAt(0)}{aprendiz.apellido?.charAt(0)}
               </div>
               <div>
@@ -338,15 +360,21 @@ export default function InstructorActivitiesDetailModal({
     </div>
   );
 
+  /* =======================
+     RENDER
+  ======================= */
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
-      <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogTitle>{activity.nombre}</DialogTitle>
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {activity.nombre}
+        </h2>
 
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b dark:border-gray-700 gap-4">
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
+            <div className="w-14 h-14 rounded-full bg-linear-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
               <Zap className="w-8 h-8" />
             </div>
             <div className="min-w-0">
@@ -423,7 +451,8 @@ export default function InstructorActivitiesDetailModal({
           {activeTab === "horarios" && renderHorariosTab()}
           {activeTab === "aprendices" && renderAprendicesTab()}
         </div>
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

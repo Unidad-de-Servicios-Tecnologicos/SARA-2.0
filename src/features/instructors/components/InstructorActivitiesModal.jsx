@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Clock, FileText, CheckCircle, AlertCircle, Edit, Download, X } from "lucide-react";
 import { mockActividadesInstructor } from "../mock/instructors.mock";
 import { ExportService } from "../services/ExportService";
@@ -60,11 +60,12 @@ export default function InstructorActivitiesModal({ isOpen, onClose, instructor,
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton={true}>
-      <div className="w-full h-full max-w-4xl mx-auto overflow-hidden flex flex-col bg-white dark:bg-gray-800">
+      <DialogContent hideCloseButton={true}>
+        <div className="w-full overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between pl-6 pr-3 py-6 pb-4 border-b dark:border-gray-700 gap-4">
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
+            <div className="w-14 h-14 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
               {instructor.nombre?.charAt(0)}
               {instructor.apellidos?.charAt(0)}
             </div>
@@ -213,7 +214,8 @@ export default function InstructorActivitiesModal({ isOpen, onClose, instructor,
             )}
           </div>
         </div>
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

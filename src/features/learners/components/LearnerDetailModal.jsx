@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { DialogTitle } from "@/components/ui/DialogTitle";
 import {
   X,
@@ -19,7 +19,9 @@ import {
 import { ExportService } from "../services/ExportService";
 import { showToast } from "@/shared/notifications";
 
-// Configuración de estados
+/* =======================
+   CONFIGURACIÓN DE ESTADOS
+======================= */
 const getEstadoConfig = (estado) => {
   const configs = {
     "EN FORMACIÓN": {
@@ -44,6 +46,9 @@ const getEstadoConfig = (estado) => {
   return configs[estado] || configs["EN FORMACIÓN"];
 };
 
+/* =======================
+   TABS DEL MODAL
+======================= */
 // Tabs
 const TABS = [
   { id: "informacion", label: "Información", icon: User },
@@ -53,6 +58,9 @@ const TABS = [
   { id: "historial", label: "Historial", icon: History },
 ];
 
+/* =======================
+   COMPONENTE MODAL
+======================= */
 export default function LearnerDetailModal({
   isOpen,
   onClose,
@@ -79,6 +87,9 @@ export default function LearnerDetailModal({
   const estadoConfig = getEstadoConfig(learner.state);
   const EstadoIcon = estadoConfig.icon;
 
+  /* =======================
+     TAB INFORMACIÓN
+  ======================= */
   const renderInformacionTab = () => (
     <div className="space-y-6">
       {/* Datos personales */}
@@ -193,6 +204,9 @@ export default function LearnerDetailModal({
     </div>
   );
 
+  /* =======================
+     TAB FICHAS ASIGNADAS
+  ======================= */
   const renderFichasTab = () => (
     <div className="space-y-3">
       {learner.fichas && learner.fichas.length > 0 ? (
@@ -228,6 +242,9 @@ export default function LearnerDetailModal({
     </div>
   );
 
+  /* =======================
+     TAB PRÁCTICAS
+  ======================= */
   const renderPracticasTab = () => (
     <div className="space-y-3">
       {learner.practices && learner.practices.length > 0 ? (
@@ -270,6 +287,9 @@ export default function LearnerDetailModal({
     </div>
   );
 
+  /* =======================
+     TAB SEGUIMIENTO
+  ======================= */
   const renderSeguimientoTab = () => (
     <div className="space-y-3">
       {learner.attendance_records && learner.attendance_records.length > 0 ? (
@@ -321,6 +341,9 @@ export default function LearnerDetailModal({
     </div>
   );
 
+  /* =======================
+     TAB HISTORIAL
+  ======================= */
   const renderHistorialTab = () => (
     <div className="space-y-3">
       {learner.state_history && learner.state_history.length > 0 ? (
@@ -353,61 +376,66 @@ export default function LearnerDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
-      <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogTitle>{learner.name}</DialogTitle>
-
+      <DialogContent hideCloseButton>
+        <div className="w-full max-w-4xl overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between p-4 pb-4 border-b dark:border-gray-700 gap-4">
-          <div className="flex items-center gap-4 min-w-0 flex-1">
-            <div className="w-14 h-14 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
-              {learner.name?.charAt(0)}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                {learner.document}
-              </p>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${estadoConfig.bg} ${estadoConfig.text}`}
-                >
-                  <EstadoIcon className="w-3 h-3" />
-                  {estadoConfig.label}
-                </span>
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+              <div className="w-14 h-14 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
+                {learner.name?.charAt(0)}
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {learner.name}
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  {learner.document}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${estadoConfig.bg} ${estadoConfig.text}`}
+                  >
+                    <EstadoIcon className="w-3 h-3" />
+                    {estadoConfig.label}
+                  </span>
+                </div>
               </div>
             </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => onEdit?.(learner)}
+                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                title="Editar"
+              >
+                <Edit className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleExportPDF}
+                disabled={isExporting}
+                className={`p-2 rounded-lg transition-colors ${
+                  isExporting
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+                title="Exportar"
+              >
+                <Download className={`w-5 h-5 ${isExporting ? "animate-spin" : ""}`} />
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => onEdit?.(learner)}
-              className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-              title="Editar"
-            >
-              <Edit className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={handleExportPDF}
-              disabled={isExporting}
-              className={`p-2 rounded-lg transition-colors ${
-                isExporting
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
-              title="Exportar"
-            >
-              <Download className={`w-5 h-5 ${isExporting ? "animate-spin" : ""}`} />
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-        </div>
 
+        {/* =======================
+           RENDER
+        ======================= */}
         {/* Tabs */}
         <div className="flex border-b dark:border-gray-700 px-4 overflow-x-auto">
           {TABS.map((tab) => {
@@ -437,7 +465,8 @@ export default function LearnerDetailModal({
           {activeTab === "seguimiento" && renderSeguimientoTab()}
           {activeTab === "historial" && renderHistorialTab()}
         </div>
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

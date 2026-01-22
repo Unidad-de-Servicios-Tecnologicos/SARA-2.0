@@ -53,7 +53,7 @@ export function AddKeywordFichaModal({ isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="pb-4 border-b dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -132,7 +132,7 @@ export function AddKeywordInstructorModal({ isOpen, onClose, instructorName = ""
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="pb-4 border-b dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">

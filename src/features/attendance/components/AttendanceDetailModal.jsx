@@ -1,6 +1,9 @@
 import { Eye, Calendar, TrendingUp, History } from 'lucide-react'
 import { DetailModal } from '@/components/ui/DetailModal'
 
+/* =======================
+   COMPONENTE MODAL
+======================= */
 export function AttendanceDetailModal({
   open,
   onOpenChange,
@@ -10,6 +13,9 @@ export function AttendanceDetailModal({
 }) {
   if (!record) return null
 
+  /* =======================
+     CONFIGURACIÓN DE TABS
+  ======================= */
   return (
     <DetailModal
       open={open}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/Dialog";
+import { DialogDescription } from "@/components/ui/DialogDescription";
 import { X, ClipboardList, Save, Calendar, Users, Building2 } from "lucide-react";
 import { showAlert, showToast } from "@/shared/notifications";
 
@@ -76,31 +77,35 @@ export default function CreateFichaModal({ isOpen, onClose, onSuccess, catalogos
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose} hideCloseButton>
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <ClipboardList className="w-5 h-5 text-green-600 dark:text-green-400" />
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-y-auto p-6">
+          <DialogTitle className="sr-only">Nueva Ficha</DialogTitle>
+          <DialogDescription className="sr-only">Formulario para crear una nueva ficha de formación.</DialogDescription>
+          {/* Header */}
+          <div className="flex items-center justify-between pb-4 border-b dark:border-gray-700 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <ClipboardList className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                  Nueva Ficha
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Crear una nueva ficha de formación
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                Nueva Ficha
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Crear una nueva ficha de formación
-              </p>
-            </div>
+            <button
+              onClick={handleClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
-          <button
-            onClick={handleClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           {/* Número y Programa */}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -289,8 +294,10 @@ export default function CreateFichaModal({ isOpen, onClose, onSuccess, catalogos
               Crear Ficha
             </button>
           </div>
-        </form>
-      </div>
+          </form>
+        </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

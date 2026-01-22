@@ -87,7 +87,7 @@ function AddNovedadModal({ isOpen, onClose, fichaId, onSuccess }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel}>
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-4xl">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Registrar Novedad
         </h3>

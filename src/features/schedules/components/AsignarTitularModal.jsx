@@ -65,7 +65,7 @@ export default function AsignarTitularModal({ isOpen, onClose, fichaCode = "" })
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel}>
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="flex items-center gap-3 pb-4 border-b dark:border-gray-700">
           <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg">

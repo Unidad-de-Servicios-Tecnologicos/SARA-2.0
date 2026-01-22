@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
-import { DialogTitle } from "@/components/ui/DialogTitle";
+import { Dialog, DialogTitle } from "@/components/ui/Dialog";
+import { DialogDescription } from "@/components/ui/DialogDescription";
 import { X, UserPlus, Save } from "lucide-react";
 import { showAlert, showToast } from "@/shared/notifications";
 import { useInstructoresMutations } from "../hooks/UseInstructors";
@@ -82,32 +82,35 @@ export default function CreateInstructorModal({ isOpen, onClose, onSuccess, cata
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose} hideCloseButton>
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogTitle>
-          Nuevo Instructor
-        </DialogTitle>
-        {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b dark:border-gray-700 gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-              <UserPlus className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+      <div className="w-full h-full flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-6">
+          <DialogTitle className="sr-only">Nuevo Instructor</DialogTitle>
+          <DialogDescription className="sr-only">Formulario para registrar un nuevo instructor.</DialogDescription>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Nuevo Instructor
+          </h2>
+          {/* Header */}
+          <div className="flex items-start justify-between pb-4 border-b dark:border-gray-700 gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <UserPlus className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Complete la información del instructor
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Complete la información del instructor
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors shrink-0"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors shrink-0"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           {/* Documento */}
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -361,7 +364,8 @@ export default function CreateInstructorModal({ isOpen, onClose, onSuccess, cata
               Guardar Instructor
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
     </Dialog>
   );

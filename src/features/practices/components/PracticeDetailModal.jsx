@@ -1,6 +1,9 @@
 import { Eye, Building2, User, Calendar, History } from 'lucide-react'
 import { DetailModal } from '@/components/ui/DetailModal'
 
+/* =======================
+   COMPONENTE MODAL
+======================= */
 export function PracticeDetailModal({
   open,
   onOpenChange,
@@ -10,6 +13,9 @@ export function PracticeDetailModal({
 }) {
   if (!practice) return null
 
+  /* =======================
+     CONFIGURACIÓN DE TABS
+  ======================= */
   return (
     <DetailModal
       open={open}

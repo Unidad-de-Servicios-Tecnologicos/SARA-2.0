@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
-import { X, User, Save, Search } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/Dialog";
+import { DialogDescription } from "@/components/ui/DialogDescription";
+import { X, User, Save } from "lucide-react";
 import { showAlert, showToast } from "@/shared/notifications";
 
 const initialForm = {
@@ -16,35 +17,20 @@ const initialForm = {
 export default function AddAprendizModal({ isOpen, onClose, fichaId, onSuccess }) {
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
-  const [searchMode, setSearchMode] = useState(true);
-  const [searched, setSearched] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSearch = async () => {
-    if (!form.documento.trim()) {
-      showToast.warning("Ingrese un número de documento");
-      return;
-    }
-    
-    setLoading(true);
-    // Simular búsqueda
-    await new Promise((r) => setTimeout(r, 500));
-    
-    // Simular que no se encontró (en producción buscaría en BD)
-    setSearched(true);
-    setSearchMode(false);
-    setLoading(false);
-    showToast.info("Complete los datos del nuevo aprendiz");
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validaciones
+    if (!form.documento.trim()) {
+      showToast.warning("Ingrese un número de documento");
+      return;
+    }
     if (!form.nombre.trim() || !form.apellidos.trim()) {
       showToast.warning("Nombre y apellidos son obligatorios");
       return;
@@ -81,173 +67,155 @@ export default function AddAprendizModal({ isOpen, onClose, fichaId, onSuccess }
 
   const handleClose = () => {
     setForm(initialForm);
-    setSearchMode(true);
-    setSearched(false);
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose} hideCloseButton>
-      <div className="w-full max-w-lg">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-y-auto p-6">
+          <DialogTitle className="sr-only">Agregar Aprendiz</DialogTitle>
+          <div className="flex items-center justify-between pb-4 border-b dark:border-gray-700 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                  Agregar Aprendiz
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Ficha: {fichaId}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                Agregar Aprendiz
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Ficha: {fichaId}
-              </p>
-            </div>
+            <button
+              onClick={handleClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
-          <button
-            onClick={handleClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-          {/* Búsqueda por documento */}
-          <div className="flex gap-2">
-            <div className="w-28">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Tipo
-              </label>
-              <select
-                name="tipoDocumento"
-                value={form.tipoDocumento}
-                onChange={handleChange}
-                disabled={!searchMode}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50"
-              >
-                <option value="CC">CC</option>
-                <option value="TI">TI</option>
-                <option value="CE">CE</option>
-                <option value="PEP">PEP</option>
-              </select>
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Número de Documento *
-              </label>
-              <div className="flex gap-2">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Tipo y Documento */}
+            <div className="flex gap-2">
+              <div className="w-28">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tipo Doc. *
+                </label>
+                <select
+                  name="tipoDocumento"
+                  value={form.tipoDocumento}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                >
+                  <option value="CC">CC</option>
+                  <option value="TI">TI</option>
+                  <option value="CE">CE</option>
+                  <option value="PEP">PEP</option>
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Número de Documento *
+                </label>
                 <input
                   type="text"
                   name="documento"
                   value={form.documento}
                   onChange={handleChange}
-                  disabled={!searchMode}
                   placeholder="Ej: 1234567890"
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50"
-                />
-                {searchMode && (
-                  <button
-                    type="button"
-                    onClick={handleSearch}
-                    disabled={loading}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-                  >
-                    <Search className="w-4 h-4" />
-                    Buscar
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Formulario completo (visible después de buscar) */}
-          {!searchMode && searched && (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Nombres *
-                  </label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={form.nombre}
-                    onChange={handleChange}
-                    placeholder="Nombres"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Apellidos *
-                  </label>
-                  <input
-                    type="text"
-                    name="apellidos"
-                    value={form.apellidos}
-                    onChange={handleChange}
-                    placeholder="Apellidos"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Correo Electrónico *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="correo@ejemplo.com"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
                 />
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Celular *
-                  </label>
-                  <input
-                    type="tel"
-                    name="celular"
-                    value={form.celular}
-                    onChange={handleChange}
-                    placeholder="3001234567"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Dirección
-                  </label>
-                  <input
-                    type="text"
-                    name="direccion"
-                    value={form.direccion}
-                    onChange={handleChange}
-                    placeholder="Dirección de residencia"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                  />
-                </div>
+            {/* Nombre y Apellidos */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nombres *
+                </label>
+                <input
+                  type="text"
+                  name="nombre"
+                  value={form.nombre}
+                  onChange={handleChange}
+                  placeholder="Nombres"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                />
               </div>
-            </>
-          )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Apellidos *
+                </label>
+                <input
+                  type="text"
+                  name="apellidos"
+                  value={form.apellidos}
+                  onChange={handleChange}
+                  placeholder="Apellidos"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                />
+              </div>
+            </div>
 
-          {/* Botones */}
-          <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            >
-              Cancelar
-            </button>
-            {!searchMode && (
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Correo Electrónico *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="correo@ejemplo.com"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+              />
+            </div>
+
+            {/* Celular y Dirección */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Celular *
+                </label>
+                <input
+                  type="tel"
+                  name="celular"
+                  value={form.celular}
+                  onChange={handleChange}
+                  placeholder="3001234567"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Dirección
+                </label>
+                <input
+                  type="text"
+                  name="direccion"
+                  value={form.direccion}
+                  onChange={handleChange}
+                  placeholder="Dirección de residencia"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Botones */}
+            <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancelar
+              </button>
               <button
                 type="submit"
                 disabled={loading}
@@ -260,10 +228,11 @@ export default function AddAprendizModal({ isOpen, onClose, fichaId, onSuccess }
                 )}
                 Guardar Aprendiz
               </button>
-            )}
-          </div>
-        </form>
-      </div>
+            </div>
+          </form>
+        </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

@@ -1,17 +1,24 @@
 import React from "react";
 import { Users, Clock, ChevronRight, BookOpen, Award } from "lucide-react";
 import { useFichasInstructor } from "../hooks/UseInstructors";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { DialogTitle } from "@/components/ui/DialogTitle";
 
+/* =======================
+   COMPONENTE MODAL
+======================= */
 export default function InstructorFichasModal({ isOpen, onClose, instructor }) {
   const { fichas, loading: loadingFichas } = useFichasInstructor(instructor?.id);
   
   if (!isOpen || !instructor) return null;
 
+  /* =======================
+     RENDER
+  ======================= */
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+    <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -69,7 +76,8 @@ export default function InstructorFichasModal({ isOpen, onClose, instructor }) {
             </div>
           )}
         </div>
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

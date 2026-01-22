@@ -11,6 +11,12 @@ import {
 } from "../hooks/UseInstructors";
 import { showToast } from "@/shared/notifications";
 
+import { Button } from "../../../components/ui/button";
+
+import { Plus } from "lucide-react";
+
+import CreateInstructorModal from '../components/CreateInstructorModal';
+
 export default function InstructorsListPage() {
   // Estados locales
   const [selectedInstructor, setSelectedInstructor] = useState(null);
@@ -30,6 +36,7 @@ export default function InstructorsListPage() {
 
   // Función para ver detalle de instructor
   const handleViewDetail = (instructor) => {
+    console.log('Abriendo modal de detalle para instructor:', instructor.nombre);
     setSelectedInstructor(instructor);
     setShowDetailModal(true);
   };

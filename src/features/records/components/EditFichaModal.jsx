@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Dialog } from "@/components/ui/Dialog";
-import { DialogTitle } from "@/components/ui/DialogTitle";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/Dialog";
+import { DialogDescription } from "@/components/ui/DialogDescription";
 import { X, ClipboardList, Save, Calendar, Users, Building2, Lock } from "lucide-react";
 import { showAlert, showToast } from "@/shared/notifications";
 
@@ -89,32 +89,36 @@ export default function EditFichaModal({ isOpen, onClose, ficha, onSuccess, cata
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogTitle>
-          Editar Ficha
-        </DialogTitle>
-        {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b dark:border-gray-700 gap-4">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg shrink-0">
-              <ClipboardList className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-y-auto p-6">
+          <DialogTitle className="sr-only">Editar Ficha</DialogTitle>
+              <DialogDescription className="sr-only">Formulario para editar los datos de la ficha.</DialogDescription>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Editar Ficha
+          </h2>
+          {/* Header */}
+          <div className="flex items-start justify-between pb-4 border-b dark:border-gray-700 gap-4 mb-6">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg shrink-0">
+                <ClipboardList className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                  Ficha {ficha.numero}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                Ficha {ficha.numero}
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors shrink-0"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors shrink-0"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           {/* Número y Programa */}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -328,8 +332,10 @@ export default function EditFichaModal({ isOpen, onClose, ficha, onSuccess, cata
               Guardar Cambios
             </button>
           </div>
-        </form>
-      </div>
+          </form>
+        </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

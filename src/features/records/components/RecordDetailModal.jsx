@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { DialogTitle } from "@/components/ui/DialogTitle";
 import { 
   X, 
@@ -21,6 +21,9 @@ import EditFichaModal from "./EditFichaModal";
 import { useAprendicesFicha, useRAPsFicha, useNovedadesFicha, useRecordsMutations, useCatalogos } from "../hooks/UseRecords";
 import { showToast } from "@/shared/notifications";
 
+/* =======================
+   TABS DEL MODAL
+======================= */
 const tabs = [
   { id: "info", label: "Información", icon: FileText },
   { id: "aprendices", label: "Aprendices", icon: Users },
@@ -28,6 +31,9 @@ const tabs = [
   { id: "novedades", label: "Novedades", icon: Bell },
 ];
 
+/* =======================
+   COMPONENTE MODAL
+======================= */
 export default function RecordDetailModal({ isOpen, onClose, ficha, onRefresh }) {
   const [activeTab, setActiveTab] = useState("info");
   const [showEditModal, setShowEditModal] = useState(false);
@@ -48,6 +54,9 @@ export default function RecordDetailModal({ isOpen, onClose, ficha, onRefresh })
   const { exportFichaDetail } = useRecordsMutations();
   const catalogos = useCatalogos();
 
+  /* =======================
+     EXPORTAR
+  ======================= */
   const handleExport = async (format) => {
     try {
       setIsExporting(true);
@@ -74,14 +83,18 @@ export default function RecordDetailModal({ isOpen, onClose, ficha, onRefresh })
 
   if (!ficha) return null;
 
+  /* =======================
+     RENDER
+  ======================= */
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+      <DialogContent hideCloseButton>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
         {/* Header */}
         <div style={{ flexShrink: 0, borderBottom: '1px solid var(--border-color)', padding: '1.5rem', backgroundColor: 'var(--bg-color)' }}>
-          <DialogTitle>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-color)' }}>
             Ficha {ficha.numero}
-          </DialogTitle>
+          </h2>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', paddingTop: '1rem', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: 0, flex: 1 }}>
               <div style={{ minWidth: 0 }}>
@@ -241,7 +254,8 @@ export default function RecordDetailModal({ isOpen, onClose, ficha, onRefresh })
           onSuccess={handleEditSuccess}
           catalogos={catalogos}
         />
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

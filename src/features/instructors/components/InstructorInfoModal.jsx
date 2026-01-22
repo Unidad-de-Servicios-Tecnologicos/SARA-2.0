@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { DialogTitle } from "@/components/ui/DialogTitle";
 import {
   X,
@@ -95,13 +95,16 @@ export default function InstructorInfoModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
-      <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-4">
-        <DialogTitle>{instructor.nombre} {instructor.apellidos}</DialogTitle>
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {instructor.nombre} {instructor.apellidos}
+        </h2>
 
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b dark:border-gray-700 gap-4">
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
+            <div className="w-14 h-14 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
               {instructor.nombre?.charAt(0)}
               {instructor.apellidos?.charAt(0)}
             </div>
@@ -306,7 +309,8 @@ export default function InstructorInfoModal({
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }
