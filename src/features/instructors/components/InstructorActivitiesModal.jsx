@@ -1,6 +1,9 @@
 import React, { useState } from "react";
-import { X, Clock, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { Dialog } from "@/components/ui/Dialog";
+import { Clock, FileText, CheckCircle, AlertCircle, Edit, Download, X } from "lucide-react";
 import { mockActividadesInstructor } from "../mock/instructors.mock";
+import { ExportService } from "../services/ExportService";
+import { showToast } from "@/shared/notifications";
 
 // Estado badge helper
 const getEstadoBadge = (estado) => {
@@ -21,10 +24,23 @@ const getEstadoBadge = (estado) => {
   return config[estado] || config["en curso"];
 };
 
-export default function InstructorActivitiesModal({ isOpen, onClose, instructor }) {
+export default function InstructorActivitiesModal({ isOpen, onClose, instructor, onEdit }) {
   const [filterEstado, setFilterEstado] = useState("todas");
+  const [isExporting, setIsExporting] = useState(false);
 
-  if (!isOpen || !instructor) return null;
+  if (!instructor) return null;
+
+  const handleExportPDF = async () => {
+    try {
+      setIsExporting(true);
+      await ExportService.exportInstructorPDF(instructor);
+      showToast.success("Información exportada correctamente");
+    } catch (error) {
+      showToast.error(error.message || "Error al exportar");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Obtener actividades del instructor
   const actividades = mockActividadesInstructor[instructor.id] || [];
@@ -43,31 +59,60 @@ export default function InstructorActivitiesModal({ isOpen, onClose, instructor 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+    <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton={true}>
+      <div className="w-full h-full max-w-4xl mx-auto overflow-hidden flex flex-col bg-white dark:bg-gray-800">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Actividades de {instructor.nombre} {instructor.apellidos}
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Documento: {instructor.documento}
-            </p>
+        <div className="flex items-start justify-between pl-6 pr-3 py-6 pb-4 border-b dark:border-gray-700 gap-4">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
+              {instructor.nombre?.charAt(0)}
+              {instructor.apellidos?.charAt(0)}
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                {instructor.nombre} {instructor.apellidos}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Documento: {instructor.documento}
+              </p>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            aria-label="Cerrar"
-          >
-            <X className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => onEdit?.(instructor)}
+              className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+              title="Editar"
+            >
+              <Edit className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPDF}
+              disabled={isExporting}
+              className={`p-2 rounded-lg transition-colors ${
+                isExporting
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+              title="Exportar"
+            >
+              <Download className={`w-5 h-5 ${isExporting ? "animate-spin" : ""}`} />
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {/* Tarjetas de estadísticas */}
-          <div className="p-6 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
                 <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Total Actividades</p>
@@ -89,7 +134,7 @@ export default function InstructorActivitiesModal({ isOpen, onClose, instructor 
           </div>
 
           {/* Filtros */}
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
               Filtrar por estado:
             </label>
@@ -111,7 +156,7 @@ export default function InstructorActivitiesModal({ isOpen, onClose, instructor 
           </div>
 
           {/* Tabla de actividades */}
-          <div className="p-6">
+          <div className="px-6 py-4">
             {actividadesFiltradas.length > 0 ? (
               <div className="space-y-3">
                 {actividadesFiltradas.map((actividad) => {
@@ -168,17 +213,7 @@ export default function InstructorActivitiesModal({ isOpen, onClose, instructor 
             )}
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-          >
-            Cerrar
-          </button>
-        </div>
       </div>
-    </div>
+    </Dialog>
   );
 }

@@ -3,13 +3,25 @@ import { useDashboardNav } from "./store/useDashboardNav";
 import { SchedulesGeneralPage } from "@/features/schedules";
 import { RecordsListPage } from "@/features/records";
 import { InstructorsListPage } from "@/features/instructors";
-import { 
+import LearnersManagementPage from "@/features/learners/pages/LearnersManagementPage";
+import AcademicPerformancePage from "@/features/learners/pages/AcademicPerformancePage";
+import AcademicManagementPage from "@/features/academic-management/pages/AcademicManagementPage";
+import AttendanceManagementPage from "@/features/attendance/pages/AttendanceManagementPage";
+import EnvironmentSchedulesPage from "@/features/environment-schedules/pages/EnvironmentSchedulesPage";
+import EnvironmentReservationsPage from "@/features/environment-reservations/pages/EnvironmentReservationsPage";
+import CompaniesManagementPage from "@/features/companies/pages/CompaniesManagementPage";
+import PracticesManagementPage from "@/features/practices/pages/PracticesManagementPage";
+import DocumentsGenerationPage from "@/features/documents/pages/DocumentsGenerationPage";
+import MonitoringPage from "@/features/monitoring/pages/MonitoringPage";
+import AnalyticsPage from "@/features/analytics/pages/AnalyticsPage";
+import {
   Building2, 
   Users, 
   UserCheck, 
   CalendarCheck, 
   FileText, 
   Diamond, 
+  Briefcase,
   Settings,
   Construction
 } from "lucide-react";
@@ -45,55 +57,40 @@ export default function RoleResolver() {
         return <SchedulesGeneralPage />;
       
       case "ambientes":
-        return (
-          <ComingSoonPage 
-            title="Gestión de Ambientes" 
-            icon={Building2}
-            description="Administra los ambientes de formación, su disponibilidad y características."
-          />
-        );
+        return <EnvironmentSchedulesPage />;
       
       case "instructores":
         return <InstructorsListPage />;
       
       case "aprendices":
-        return (
-          <ComingSoonPage 
-            title="Gestión de Aprendices" 
-            icon={UserCheck}
-            description="Administra la información de los aprendices, estados y seguimiento académico."
-          />
-        );
+        return <LearnersManagementPage />;
       
       case "fichas":
-        return <RecordsListPage />;
+        return <AcademicManagementPage />;
       
       case "reservas":
-        return (
-          <ComingSoonPage 
-            title="Gestión de Reservas" 
-            icon={CalendarCheck}
-            description="Reserva ambientes de formación y gestiona la disponibilidad de espacios."
-          />
-        );
+        return <EnvironmentReservationsPage />;
       
-      case "documentos":
-        return (
-          <ComingSoonPage 
-            title="Gestión de Documentos" 
-            icon={FileText}
-            description="Genera y administra documentos académicos, actas y reportes."
-          />
-        );
+      case "rendimiento":
+        return <AcademicPerformancePage />;
+      
+      case "asistencia":
+        return <AttendanceManagementPage />;
+      
+      case "empresas":
+        return <CompaniesManagementPage />;
       
       case "practicas":
-        return (
-          <ComingSoonPage 
-            title="Gestión de Prácticas" 
-            icon={Diamond}
-            description="Administra la etapa productiva, empresas, seguimientos e inducciones."
-          />
-        );
+        return <PracticesManagementPage />;
+      
+      case "documentos":
+        return <DocumentsGenerationPage />;
+      
+      case "seguimiento":
+        return <MonitoringPage />;
+      
+      case "analytics":
+        return <AnalyticsPage />;
       
       case "configuracion":
         return (

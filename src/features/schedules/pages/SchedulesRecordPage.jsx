@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import { 
   FileSpreadsheet, 
   List, 
@@ -23,9 +24,13 @@ import RendimientoAcademicoModal from "../components/RendimientoAcademicoModal";
 import { showToast } from "@/shared/notifications";
 
 export default function SchedulesRecordPage() {
-  const [searchValue, setSearchValue] = useState("");
+  const { fichaNumero } = useParams(); // Obtener número de ficha de la ruta
+  const location = useLocation();
+  const initialSearchValue = fichaNumero || location.state?.initialSearchValue || location.state?.ficha?.numero || "";
+  
+  const [searchValue, setSearchValue] = useState(initialSearchValue);
   const [periodo, setPeriodo] = useState("2024 - 4");
-  const [hasSearched, setHasSearched] = useState(false);
+  const [hasSearched, setHasSearched] = useState(!!initialSearchValue);
   const [isExporting, setIsExporting] = useState(false);
   
   // Estados de modales
@@ -37,6 +42,14 @@ export default function SchedulesRecordPage() {
   const [showAsignarTitularModal, setShowAsignarTitularModal] = useState(false);
   const [showEntregaFichaModal, setShowEntregaFichaModal] = useState(false);
   const [showRendimientoModal, setShowRendimientoModal] = useState(false);
+
+  // Si viene de una ficha específica, hacer búsqueda automática
+  useEffect(() => {
+    if (initialSearchValue && !hasSearched) {
+      setSearchValue(initialSearchValue);
+      setHasSearched(true);
+    }
+  }, [initialSearchValue, hasSearched]);
 
   // Datos de horas programadas (mock)
   const horasProgramadas = {

@@ -410,19 +410,19 @@ export default function InstructorDetailModal({ isOpen, onClose, instructor, onE
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
-      <div className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogTitle>
-          {instructor.nombre} {instructor.apellidos}
-        </DialogTitle>
+      <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b dark:border-gray-700 gap-4">
+        <div className="flex items-start justify-between p-4 pb-4 border-b dark:border-gray-700 gap-4">
           <div className="flex items-center gap-4 min-w-0 flex-1">
             {/* Avatar */}
-            <div className="w-14 h-14 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shrink-0">
               {instructor.nombre?.charAt(0)}{instructor.apellidos?.charAt(0)}
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2 mt-1">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                {instructor.nombre} {instructor.apellidos}
+              </h2>
+              <div className="flex items-center gap-2 mt-2">
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${estadoConfig.bg} ${estadoConfig.text}`}>
                   <EstadoIcon className="w-3 h-3" />
                   {estadoConfig.label}
@@ -466,7 +466,7 @@ export default function InstructorDetailModal({ isOpen, onClose, instructor, onE
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b dark:border-gray-700 mt-4">
+        <div className="flex border-b dark:border-gray-700 px-4">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             return (

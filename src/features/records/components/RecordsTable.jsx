@@ -1,28 +1,62 @@
 import React, { useState, useEffect } from "react";
 import { 
   Eye, 
-  MoreVertical, 
   Users, 
   Calendar, 
   Clock,
   Building2,
   User,
-  TrendingUp,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+import RecordsActionsMenu from "./RecordsActionsMenu";
 
 // Helper para obtener color y label de estado
 const getEstadoConfig = (estado) => {
   const config = {
-    activa: { color: "green", label: "Activa" },
-    en_formacion: { color: "blue", label: "En Formación" },
-    en_etapa_productiva: { color: "purple", label: "Etapa Productiva" },
-    suspendida: { color: "yellow", label: "Suspendida" },
-    finalizada: { color: "gray", label: "Finalizada" },
-    cancelada: { color: "red", label: "Cancelada" },
+    activa: { 
+      color: "green", 
+      label: "Activa",
+      bgClasses: "bg-green-100 dark:bg-green-900/30",
+      textClasses: "text-green-700 dark:text-green-300"
+    },
+    en_formacion: { 
+      color: "blue", 
+      label: "En Formación",
+      bgClasses: "bg-blue-100 dark:bg-blue-900/30",
+      textClasses: "text-blue-700 dark:text-blue-300"
+    },
+    en_etapa_productiva: { 
+      color: "purple", 
+      label: "Etapa Productiva",
+      bgClasses: "bg-purple-100 dark:bg-purple-900/30",
+      textClasses: "text-purple-700 dark:text-purple-300"
+    },
+    suspendida: { 
+      color: "yellow", 
+      label: "Suspendida",
+      bgClasses: "bg-yellow-100 dark:bg-yellow-900/30",
+      textClasses: "text-yellow-700 dark:text-yellow-300"
+    },
+    finalizada: { 
+      color: "gray", 
+      label: "Finalizada",
+      bgClasses: "bg-gray-100 dark:bg-gray-700",
+      textClasses: "text-gray-900 dark:text-white font-medium"
+    },
+    cancelada: { 
+      color: "red", 
+      label: "Cancelada",
+      bgClasses: "bg-red-100 dark:bg-red-900/30",
+      textClasses: "text-red-700 dark:text-red-300"
+    },
   };
-  return config[estado] || { color: "gray", label: estado };
+  return config[estado] || { 
+    color: "gray", 
+    label: estado,
+    bgClasses: "bg-gray-100 dark:bg-gray-700",
+    textClasses: "text-gray-900 dark:text-white font-medium"
+  };
 };
 
 // Helper para obtener label de jornada
@@ -34,16 +68,6 @@ const getJornadaLabel = (jornada) => {
     fines_semana: "Fines de Semana",
   };
   return labels[jornada] || jornada;
-};
-
-// Helper para obtener label de fase
-const getFaseLabel = (fase) => {
-  const labels = {
-    induccion: "Inducción",
-    lectiva: "Lectiva",
-    productiva: "Productiva",
-  };
-  return labels[fase] || fase;
 };
 
 // Componente de tarjeta para vista móvil
@@ -59,7 +83,7 @@ function RecordCard({ ficha, onViewDetail }) {
             <span className="text-lg font-bold text-gray-900 dark:text-white">
               {ficha.numero}
             </span>
-            <span className={`px-2 py-0.5 text-xs font-medium rounded-full bg-${estadoConfig.color}-100 dark:bg-${estadoConfig.color}-900/30 text-${estadoConfig.color}-700 dark:text-${estadoConfig.color}-300`}>
+            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${estadoConfig.bgClasses} ${estadoConfig.textClasses}`}>
               {estadoConfig.label}
             </span>
           </div>
@@ -95,18 +119,9 @@ function RecordCard({ ficha, onViewDetail }) {
         </div>
       </div>
 
-      {/* Avance */}
+      {/* Acciones */}
       <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-        <div className="flex items-center justify-between text-sm mb-1">
-          <span className="text-gray-500 dark:text-gray-400">Avance RAPs</span>
-          <span className="font-medium text-gray-900 dark:text-white">{ficha.avanceRAPs}%</span>
-        </div>
-        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-blue-500 rounded-full transition-all duration-500"
-            style={{ width: `${ficha.avanceRAPs}%` }}
-          />
-        </div>
+        <RecordsActionsMenu ficha={ficha} onViewDetail={onViewDetail} />
       </div>
     </div>
   );
@@ -120,28 +135,19 @@ function RecordTable({ fichas, onViewDetail }) {
         <thead>
           <tr className="border-b border-gray-200 dark:border-gray-700">
             <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-              Ficha
+              Código Ficha
             </th>
             <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
               Programa
             </th>
             <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-              Instructor Titular
+              Estado
             </th>
             <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
               Jornada
             </th>
-            <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-              Fase
-            </th>
-            <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-              Estado
-            </th>
             <th className="text-center py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
               Aprendices
-            </th>
-            <th className="text-center py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-              Avance
             </th>
             <th className="text-center py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
               Acciones
@@ -173,23 +179,13 @@ function RecordTable({ fichas, onViewDetail }) {
                   </div>
                 </td>
                 <td className="py-3 px-4">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {ficha.instructorTitular?.nombre || "Sin asignar"}
+                  <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${estadoConfig.bgClasses} ${estadoConfig.textClasses}`}>
+                    {estadoConfig.label}
                   </span>
                 </td>
                 <td className="py-3 px-4">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
                     {getJornadaLabel(ficha.jornada)}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {getFaseLabel(ficha.fase)}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-${estadoConfig.color}-100 dark:bg-${estadoConfig.color}-900/30 text-${estadoConfig.color}-700 dark:text-${estadoConfig.color}-300`}>
-                    {estadoConfig.label}
                   </span>
                 </td>
                 <td className="py-3 px-4 text-center">
@@ -202,33 +198,8 @@ function RecordTable({ fichas, onViewDetail }) {
                   </div>
                 </td>
                 <td className="py-3 px-4">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden min-w-16">
-                      <div 
-                        className="h-full bg-blue-500 rounded-full"
-                        style={{ width: `${ficha.avanceRAPs}%` }}
-                      />
-                    </div>
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-10 text-right">
-                      {ficha.avanceRAPs}%
-                    </span>
-                  </div>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center justify-center gap-1">
-                    <button
-                      onClick={() => onViewDetail(ficha)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                      title="Ver detalle"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button
-                      className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      title="Más opciones"
-                    >
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
+                  <div className="flex items-center justify-center">
+                    <RecordsActionsMenu ficha={ficha} onViewDetail={onViewDetail} />
                   </div>
                 </td>
               </tr>

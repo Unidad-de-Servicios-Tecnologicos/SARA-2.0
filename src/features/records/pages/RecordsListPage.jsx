@@ -9,12 +9,11 @@ import {
   FileSpreadsheet,
   File
 } from "lucide-react";
-import RecordKpis from "../components/RecordKpis";
 import RecordSearch from "../components/RecordSearch";
 import RecordsTable from "../components/RecordsTable";
 import RecordDetailModal from "../components/RecordDetailModal";
 import CreateFichaModal from "../components/CreateFichaModal";
-import { useFichas, useRecordsKPIs, useCatalogos, useRecordsMutations } from "../hooks/UseRecords";
+import { useFichas, useCatalogos, useRecordsMutations } from "../hooks/UseRecords";
 import { showToast } from "@/shared/notifications";
 
 export default function RecordsListPage() {
@@ -29,15 +28,13 @@ export default function RecordsListPage() {
 
   // Hooks de datos
   const { fichas, loading, filters, updateFilters, clearFilters, refetch } = useFichas();
-  const { kpis, loading: loadingKpis, refetch: refetchKpis } = useRecordsKPIs();
   const catalogos = useCatalogos();
   const { exportFichas, loading: exporting } = useRecordsMutations();
 
   // Función centralizada para refrescar todos los datos
   const refreshAll = useCallback(() => {
     refetch();
-    refetchKpis();
-  }, [refetch, refetchKpis]);
+  }, [refetch]);
 
   // Manejar búsqueda
   const handleSearch = useCallback((term) => {
@@ -176,9 +173,6 @@ export default function RecordsListPage() {
           </button>
         </div>
       </div>
-
-      {/* KPIs */}
-      <RecordKpis kpis={kpis} loading={loadingKpis} />
 
       {/* Búsqueda y filtros */}
       <RecordSearch

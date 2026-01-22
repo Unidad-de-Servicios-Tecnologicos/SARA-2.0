@@ -1,6 +1,13 @@
 import React from "react";
 import { Search, Filter, X } from "lucide-react";
 
+/**
+ * Componente de búsqueda y filtros para Gestión de Fichas
+ * 
+ * Según SARA, incluye:
+ * - Búsqueda: Código de Ficha, Programa
+ * - Filtros: Estado, Jornada
+ */
 export default function RecordSearch({ 
   search, 
   onSearchChange, 
@@ -11,9 +18,9 @@ export default function RecordSearch({
   showFilters = false,
   onToggleFilters
 }) {
-  const { estados = [], programas = [], sedes = [], jornadas = [], fases = [] } = catalogos;
+  const { estados = [], programas = [], jornadas = [] } = catalogos;
 
-  const hasActiveFilters = filters.estado || filters.programaId || filters.sedeId || filters.jornada || filters.fase;
+  const hasActiveFilters = filters.estado || filters.programaId || filters.jornada;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 space-y-4">
@@ -51,7 +58,7 @@ export default function RecordSearch({
       {/* Panel de filtros expandible */}
       {showFilters && (
         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Estado */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -86,23 +93,6 @@ export default function RecordSearch({
               </select>
             </div>
 
-            {/* Sede */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Sede
-              </label>
-              <select
-                value={filters.sedeId || ""}
-                onChange={(e) => onFilterChange({ sedeId: e.target.value ? parseInt(e.target.value) : null })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="">Todas</option>
-                {sedes.map(sede => (
-                  <option key={sede.id} value={sede.id}>{sede.nombre}</option>
-                ))}
-              </select>
-            </div>
-
             {/* Jornada */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -116,23 +106,6 @@ export default function RecordSearch({
                 <option value="">Todas</option>
                 {jornadas.map(jornada => (
                   <option key={jornada.id} value={jornada.id}>{jornada.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Fase */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Fase
-              </label>
-              <select
-                value={filters.fase || ""}
-                onChange={(e) => onFilterChange({ fase: e.target.value || null })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="">Todas</option>
-                {fases.map(fase => (
-                  <option key={fase.id} value={fase.id}>{fase.label}</option>
                 ))}
               </select>
             </div>

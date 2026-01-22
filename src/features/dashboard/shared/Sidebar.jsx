@@ -12,6 +12,9 @@ import {
   LogOut,
   Settings,
   Diamond,
+  Briefcase,
+  BarChart3,
+  TrendingUp,
   Moon,
   Sun,
 } from "lucide-react"
@@ -46,14 +49,21 @@ export default function Sidebar({ isExpanded = false, onCloseMobile }) {
     { label: "Fichas", icon: ClipboardList, module: "fichas" },
     { label: "Horarios", icon: Calendar, module: "horarios" },
     { label: "Reservas", icon: CalendarCheck, module: "reservas" },
+    { label: "Empresas", icon: Briefcase, module: "empresas" },
     { label: "Documentos", icon: FileText, module: "documentos" },
     { label: "Prácticas", icon: Diamond, module: "practicas" },
+    { label: "Seguimiento", icon: BarChart3, module: "seguimiento" },
+    { label: "Análisis", icon: TrendingUp, module: "analytics" },
     { label: "Configuración", icon: Settings, module: "configuracion" },
   ]
 
   const handleMenuClick = (module) => {
     setCurrentModule(module)
-    navigate('/dashboard')
+    if (module === "dashboard") {
+      navigate('/dashboard')
+    } else {
+      navigate(`/${module}`)
+    }
     onCloseMobile?.()
   }
 
