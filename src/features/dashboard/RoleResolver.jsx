@@ -1,5 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import SubdirectorDashboard from "./components/subdirector/SubdirectorDashboard";
 import { useDashboardNav } from "./store/useDashboardNav";
+import { useAuthStore } from "@/features/auth/store/useAuth";
+import { usePermissionStore } from "@/features/auth/store/usePermissionStore";
 import { SchedulesGeneralPage } from "@/features/schedules";
 import { RecordsListPage } from "@/features/records";
 import { InstructorsListPage } from "@/features/instructors";
@@ -14,6 +17,7 @@ import PracticesManagementPage from "@/features/practices/pages/PracticesManagem
 import DocumentsGenerationPage from "@/features/documents/pages/DocumentsGenerationPage";
 import MonitoringPage from "@/features/monitoring/pages/MonitoringPage";
 import AnalyticsPage from "@/features/analytics/pages/AnalyticsPage";
+import ConfigurationPage from "@/features/configuration/pages/ConfigurationPage";
 import {
   Building2, 
   Users, 
@@ -23,8 +27,29 @@ import {
   Diamond, 
   Briefcase,
   Settings,
-  Construction
+  Construction,
+  Lock,
 } from "lucide-react";
+
+// 👇 COMPONENTE: ACCESO DENEGADO
+function AccessDeniedPage() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-gray-800">
+      <div className="p-6 bg-red-100 dark:bg-red-900/30 rounded-full mb-6">
+        <Lock className="w-16 h-16 text-red-600 dark:text-red-400" />
+      </div>
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        Acceso Denegado
+      </h2>
+      <p className="text-gray-600 dark:text-gray-400 text-center max-w-md mb-6">
+        No tienes permisos para acceder a este módulo según tu rol actual.
+      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-500">
+        Contacta al administrador si crees que esto es un error.
+      </p>
+    </div>
+  );
+}
 
 // Componente placeholder para módulos en desarrollo
 function ComingSoonPage({ title, icon: Icon, description }) {
@@ -48,7 +73,22 @@ function ComingSoonPage({ title, icon: Icon, description }) {
 }
 
 export default function RoleResolver() {
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const currentModule = useDashboardNav((s) => s.currentModule);
+  // 👇 OBTENER PERMISOS DEL USUARIO
+  const canAccessModule = usePermissionStore((s) => s.canAccessModule);
+
+  // ⚠️ VALIDAR AUTENTICACIÓN PRIMERO - Si no hay usuario, ir a login
+  if (!user) {
+    navigate("/auth/login", { replace: true });
+    return null;
+  }
+
+  // 👇 VALIDAR ACCESO AL MÓDULO ANTES DE RENDERIZAR
+  if (currentModule !== "dashboard" && !canAccessModule(currentModule)) {
+    return <AccessDeniedPage />;
+  }
 
   // Renderizar módulo según navegación
   const renderModule = () => {
@@ -93,13 +133,7 @@ export default function RoleResolver() {
         return <AnalyticsPage />;
       
       case "configuracion":
-        return (
-          <ComingSoonPage 
-            title="Configuración" 
-            icon={Settings}
-            description="Configura las opciones del sistema, usuarios y permisos."
-          />
-        );
+        return <ConfigurationPage />;
       
       case "dashboard":
       default:

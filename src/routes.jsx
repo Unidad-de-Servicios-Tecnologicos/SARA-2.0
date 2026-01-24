@@ -2,6 +2,8 @@ import { createBrowserRouter, Navigate } from "react-router-dom"
 
 import LandingPage from "@/features/landing/pages/LandingPage"
 import LoginPage from "@/features/auth/pages/LoginPage"
+import ProfilePage from "@/features/auth/pages/ProfilePage"
+import AccessDeniedPage from "@/features/auth/pages/AccessDeniedPage"
 import DashboardPage from "@/features/dashboard/pages/DashboardPage"
 import DashboardModulePage from "@/features/dashboard/pages/DashboardModulePage"
 import { RecordsListPage, RecordDetailPage } from "@/features/records"
@@ -24,6 +26,14 @@ export const router = createBrowserRouter([
   {
     path: "/auth/login",
     element: <LoginPage />,
+  },
+  {
+    path: "/perfil",
+    element: <ProfilePage />,
+  },
+  {
+    path: "/acceso-denegado",
+    element: <AccessDeniedPage />,
   },
   {
     path: "/dashboard",
