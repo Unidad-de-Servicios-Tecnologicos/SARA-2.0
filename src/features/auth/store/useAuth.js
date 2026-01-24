@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { authService } from "../services/authService";
+import { usePermissionStore } from "./usePermissionStore";
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -9,24 +10,32 @@ export const useAuthStore = create((set, get) => ({
   init: () => {
     const stored = localStorage.getItem("sara_user");
     if (stored) {
-      set({ user: JSON.parse(stored) });
+      const user = JSON.parse(stored);
+      set({ user });
+      // Inicializar permisos al recuperar usuario de localStorage
+      usePermissionStore.getState().initPermissions(user.role);
     }
   },
 
-  login: async (username, password) => {
+  login: async (username, password, role) => {
   set({ loading: true, error: null });
 
   try {
     const response = await authService.login(username, password);
 
-    // 👇 NORMALIZAMOS EL USUARIO (CLAVE)
+    // 👇 NORMALIZAMOS EL USUARIO CON ROL ASIGNADO (ROL SELECCIONADO TIENE PRIORIDAD)
     const user = {
       ...response,
-      role: response.role || "SUBDIRECTOR", // 👈 Vista principal del Subdirector
+      role: role || "INVITADO", // 👈 PRIORIDAD: rol seleccionado en formulario
     };
+
+    console.log("🔐 Login exitoso - Usuario:", user.name, "Rol:", user.role);
 
     localStorage.setItem("sara_user", JSON.stringify(user));
     set({ user, loading: false });
+    
+    // 👇 INICIALIZAR PERMISOS BASADO EN ROL SELECCIONADO
+    usePermissionStore.getState().initPermissions(user.role);
 
   } catch {
     set({ error: "Credenciales incorrectas", loading: false });
@@ -36,6 +45,8 @@ export const useAuthStore = create((set, get) => ({
   logout: () => {
     localStorage.removeItem("sara_user");
     set({ user: null });
+    // 👇 LIMPIAR PERMISOS AL LOGOUT
+    usePermissionStore.getState().clearPermissions();
   },
 
   // Actualizar avatar del usuario

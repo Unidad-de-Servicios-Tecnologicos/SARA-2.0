@@ -3,45 +3,37 @@ import { useAuthStore } from "../store/useAuth";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
+import { ROLES, ROLE_METADATA } from "@/config/permissions";
+import { showToast, showAlert } from '@/shared/notifications';
+import ForgotPassword from "./ForgotPassword";
 
 export default function LoginForm() {
   const login = useAuthStore((s) => s.login);
   const loading = useAuthStore((s) => s.loading);
   const error = useAuthStore((s) => s.error);
 
-  const [form, setForm] = useState({ username: "", password: "" });
+  const [form, setForm] = useState({ username: "", password: "", role: "ADMINISTRADOR" });
   const [showPassword, setShowPassword] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login(form.username, form.password);
+    if (!form.username || !form.password) {
+      showAlert.warning('Validación', 'Por favor completa todos los campos')
+      return
+    }
+    // 👇 PASAR EL ROL SELECCIONADO AL LOGIN
+    login(form.username, form.password, form.role);
   };
 
+  // Mostrar componente de recuperación de contraseña
   if (showRecovery) {
-    return (
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-gray-800">
-          Recuperar contraseña
-        </h2>
-
-        <p className="text-sm text-gray-600">
-          Funcionalidad simulada para entorno de pruebas.
-        </p>
-
-        <Button
-          type="button"
-          onClick={() => setShowRecovery(false)}
-          className="w-full"
-        >
-          Volver al login
-        </Button>
-      </div>
-    );
+    return <ForgotPassword onBack={() => setShowRecovery(false)} />;
   }
 
   return (
@@ -92,11 +84,41 @@ export default function LoginForm() {
         </p>
       </div>
 
+      {/* 👇 SELECTOR DE ROL (MULTIROL) */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          🔐 Selecciona tu rol
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          {Object.entries(ROLES).map(([, value]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setForm({ ...form, role: value })}
+              className={`p-2 text-xs font-medium rounded-lg border transition-all ${
+                form.role === value
+                  ? "border-green-600 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-400"
+              }`}
+            >
+              <div className="text-lg">{ROLE_METADATA[value]?.icon || "•"}</div>
+              <div className="truncate">{ROLE_METADATA[value]?.label || value}</div>
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          {ROLE_METADATA[form.role]?.description}
+        </p>
+      </div>
+
       {/* ERROR */}
       {error && (
-        <p className="text-red-600 text-sm font-medium">
-          {error}
-        </p>
+        <>
+          {showToast.error(error)}
+          <p className="text-red-600 text-sm font-medium">
+            {error}
+          </p>
+        </>
       )}
 
       {/* BOTÓN */}
