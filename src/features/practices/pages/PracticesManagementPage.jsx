@@ -3,6 +3,8 @@ import { Search, Plus, Edit2, Trash2, Eye, Download, AlertCircle, CheckCircle2, 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/Input'
+import { showToast, showAlert } from '@/shared/notifications'
+import { downloadExcel } from '@/utils/downloadExcel'
 
 export default function PracticesManagementPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -97,7 +99,7 @@ export default function PracticesManagementPage() {
   // Handle form submission
   const handleSavePractice = () => {
     if (!formData.learnerName || !formData.company || !formData.startDate) {
-      alert('Por favor completa los campos requeridos')
+      showAlert.warning('Campos incompletos', 'Por favor completa todos los campos requeridos')
       return
     }
 
@@ -105,6 +107,7 @@ export default function PracticesManagementPage() {
       setPractices(practices.map(p =>
         p.id === editingId ? { ...p, ...formData } : p
       ))
+      showToast.success(`Práctica de ${formData.learnerName} actualizada exitosamente`)
       setEditingId(null)
     } else {
       const newPractice = {
@@ -116,6 +119,7 @@ export default function PracticesManagementPage() {
         documents: { submitted: 0, pending: 0 }
       }
       setPractices([...practices, newPractice])
+      showToast.success(`Práctica de ${formData.learnerName} creada exitosamente`)
     }
 
     setFormData({
@@ -145,28 +149,54 @@ export default function PracticesManagementPage() {
 
   // Handle delete
   const handleDelete = (id) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar esta práctica?')) {
-      setPractices(practices.filter(p => p.id !== id))
-      setSelectedPractice(null)
-    }
+    const practiceToDelete = practices.find(p => p.id === id)
+    showAlert.confirmDelete(practiceToDelete?.learnerName || 'esta práctica').then((result) => {
+      if (result.isConfirmed) {
+        setPractices(practices.filter(p => p.id !== id))
+        setSelectedPractice(null)
+        showToast.success('Práctica eliminada exitosamente')
+      }
+    })
   }
 
   // Export to CSV
   const handleExportCSV = () => {
-    const headers = ['Aprendiz', 'Documento', 'Empresa', 'Programa', 'Fase', 'Estado', 'Inicio', 'Fin']
-    const csvContent = [
-      headers.join(','),
-      ...filteredPractices.map(p =>
-        `"${p.learnerName}","${p.learnerDocument}","${p.company}","${p.program}","${p.phase}","${p.status}","${p.startDate}","${p.endDate}"`
-      )
-    ].join('\n')
+    if (filteredPractices.length === 0) {
+      showAlert.warning('No hay datos', 'No hay prácticas para exportar')
+      return
+    }
+    
+    const toastId = showToast.loading('Preparando archivo de descarga...')
+    try {
+      const columns = [
+        { key: 'learnerName', label: 'Aprendiz' },
+        { key: 'learnerDocument', label: 'Documento' },
+        { key: 'fichaCode', label: 'Ficha' },
+        { key: 'company', label: 'Empresa' },
+        { key: 'program', label: 'Programa' },
+        { key: 'phase', label: 'Fase' },
+        { key: 'status', label: 'Estado' },
+        { key: 'startDate', label: 'Inicio' },
+        { key: 'endDate', label: 'Fin' }
+      ]
 
-    const blob = new Blob([csvContent], { type: 'text/csv' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'practicas.csv'
-    a.click()
+      downloadExcel(
+        filteredPractices,
+        columns,
+        'Reporte de Prácticas Profesionales',
+        `practicas_${new Date().toISOString().split('T')[0]}`,
+        {
+          subtitulo: 'Información detallada de prácticas en empresas',
+          rowClassName: (row) => row.status === 'Completado' ? 'bg-green-50' : row.status === 'En Progreso' ? 'bg-blue-50' : 'bg-white'
+        }
+      )
+      
+      showToast.dismiss(toastId)
+      showToast.success(`Se descargó el archivo con ${filteredPractices.length} prácticas`)
+    } catch (error) {
+      showToast.dismiss(toastId)
+      showToast.error('Error al descargar el archivo')
+    }
   }
 
   // Statistics
@@ -198,8 +228,8 @@ export default function PracticesManagementPage() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Gestión de Prácticas y Pasantías</h1>
-        <p className="text-slate-600">Administra la etapa productiva, inducciones, seguimientos y evaluaciones</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Gestión de Prácticas y Pasantías</h1>
+        <p className="text-slate-600 dark:text-gray-400">Administra la etapa productiva, inducciones, seguimientos y evaluaciones</p>
       </div>
 
       {/* Statistics Cards */}
@@ -309,7 +339,7 @@ export default function PracticesManagementPage() {
           {/* Form */}
           {showForm && (
             <Card className="mb-6 p-6 bg-blue-50 border-blue-200">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                 {editingId ? 'Editar Práctica' : 'Registrar Nueva Práctica'}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -506,7 +536,7 @@ export default function PracticesManagementPage() {
             <Card className="bg-white sticky top-4">
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-slate-900">Detalles</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Detalles</h3>
                   <button
                     onClick={() => setSelectedPractice(null)}
                     className="text-slate-500 hover:text-slate-700"

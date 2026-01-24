@@ -21,7 +21,8 @@ import { AllInstructorCalendarsModal, AllFichaCalendarsModal } from "../componen
 import AsignarTitularModal from "../components/AsignarTitularModal";
 import EntregaFichaModal from "../components/EntregaFichaModal";
 import RendimientoAcademicoModal from "../components/RendimientoAcademicoModal";
-import { showToast } from "@/shared/notifications";
+import { showToast, showAlert } from "@/shared/notifications";
+import { downloadReport } from '@/utils/downloadReports';
 
 export default function SchedulesRecordPage() {
   const { fichaNumero } = useParams(); // Obtener número de ficha de la ruta
@@ -63,12 +64,13 @@ export default function SchedulesRecordPage() {
     setHasSearched(true);
   };
 
-  const handleDownload = async (type) => {
+  const handleDownload = async (type, format = 'excel') => {
     try {
       setIsExporting(true);
-      const { ExportService } = await import("@/features/instructors/services/ExportService");
       
       if (type === "horario") {
+        const toastId = showToast.loading(`Preparando ${format.toUpperCase()}...`);
+        
         // Datos de ejemplo del horario de ficha
         const scheduleData = [
           {
@@ -88,9 +90,32 @@ export default function SchedulesRecordPage() {
             instructor: "María García"
           }
         ];
-        await ExportService.exportScheduleExcel('ficha', scheduleData);
-        showToast.success("Horario exportado a Excel correctamente");
+
+        const columns = [
+          { key: 'ficha', label: 'Ficha' },
+          { key: 'dia', label: 'Día' },
+          { key: 'horaInicio', label: 'Hora Inicio' },
+          { key: 'horaFin', label: 'Hora Fin' },
+          { key: 'competencia', label: 'Competencia' },
+          { key: 'instructor', label: 'Instructor' }
+        ];
+
+        downloadReport(
+          scheduleData,
+          columns,
+          `Horario - Ficha ${searchValue || 'General'}`,
+          `horario_${searchValue || 'ficha'}_${new Date().toISOString().split('T')[0]}`,
+          format,
+          {
+            subtitulo: `Período: ${periodo}`,
+          }
+        );
+
+        showToast.dismiss(toastId);
+        showToast.success("Horario descargado exitosamente");
       } else if (type === "aprendices") {
+        const toastId = showToast.loading(`Preparando ${format.toUpperCase()}...`);
+        
         // Datos de ejemplo de aprendices
         const aprendicesData = [
           {
@@ -110,8 +135,30 @@ export default function SchedulesRecordPage() {
             estado: "Activo"
           }
         ];
-        await ExportService.exportAprendicesList(aprendicesData, searchValue);
-        showToast.success("Lista de aprendices exportada correctamente");
+
+        const columns = [
+          { key: 'documento', label: 'Documento' },
+          { key: 'nombre', label: 'Nombre' },
+          { key: 'apellidos', label: 'Apellidos' },
+          { key: 'email', label: 'Email' },
+          { key: 'telefono', label: 'Teléfono' },
+          { key: 'estado', label: 'Estado' }
+        ];
+
+        downloadReport(
+          aprendicesData,
+          columns,
+          `Aprendices - Ficha ${searchValue || 'General'}`,
+          `aprendices_${searchValue || 'ficha'}_${new Date().toISOString().split('T')[0]}`,
+          format,
+          {
+            subtitulo: `Período: ${periodo}`,
+            rowClassName: (row) => row.estado === 'Activo' ? 'bg-green-50' : 'bg-gray-50'
+          }
+        );
+
+        showToast.dismiss(toastId);
+        showToast.success("Lista de aprendices descargada exitosamente");
       }
     } catch (error) {
       showToast.error(error.message || `Error al exportar ${type}`);

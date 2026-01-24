@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Calendar, Download, Save, History } from 'lucide-react'
+import { Calendar, Download, Save, History, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/card'
+import { showToast, showAlert } from '@/shared/notifications'
+import { downloadReport } from '@/utils/downloadReports'
 
 export default function AttendanceManagementPage() {
   const [selectedFicha, setSelectedFicha] = useState('')
@@ -42,9 +44,71 @@ export default function AttendanceManagementPage() {
   }
 
   const handleConsult = () => {
-    if (selectedFicha) {
-      initializeAttendance()
+    if (!selectedFicha) {
+      showAlert.warning('Validación', 'Por favor selecciona una ficha')
+      return
     }
+    initializeAttendance()
+    showToast.info(`Ficha ${selectedFicha} cargada para el ${selectedDate}`)
+  }
+
+  const handleExportData = async (format) => {
+    if (!selectedFicha) {
+      showAlert.warning('Por favor selecciona una ficha para exportar')
+      return
+    }
+
+    const toastId = showToast.loading(`Preparando ${format.toUpperCase()}...`)
+    
+    try {
+      const dataToExport = learners.map(learner => ({
+        documento: learner.document || '',
+        aprendiz: learner.name || '',
+        fecha: selectedDate || '',
+        asistencia: attendance[learner.id] ? 'Presente' : 'Ausente',
+        observacion: ''
+      }))
+
+      const columns = [
+        { key: 'documento', label: 'Documento' },
+        { key: 'aprendiz', label: 'Aprendiz' },
+        { key: 'fecha', label: 'Fecha' },
+        { key: 'asistencia', label: 'Asistencia' },
+        { key: 'observacion', label: 'Observación' }
+      ]
+
+      await downloadReport(
+        dataToExport,
+        columns,
+        'Gestión de Asistencia',
+        `asistencia_${selectedFicha}_${selectedDate}`,
+        format,
+        {
+          subtitulo: `Reporte de asistencia para la ficha ${selectedFicha} del ${selectedDate}`,
+          rowClassName: (row) => {
+            if (row.asistencia === 'Presente') return 'bg-green-50'
+            if (row.asistencia === 'Ausente') return 'bg-red-50'
+            return 'bg-white'
+          }
+        }
+      )
+
+      showToast.dismiss(toastId)
+      showToast.success(`${dataToExport.length} registros exportados exitosamente`)
+    } catch (error) {
+      showToast.dismiss(toastId)
+      showToast.error('Error al exportar los datos')
+      console.error('Export error:', error)
+    }
+  }
+
+  const handleViewHistory = () => {
+    if (!selectedFicha) {
+      showAlert.warning('Validación', 'Por favor selecciona una ficha para ver el historial')
+      return
+    }
+    setShowHistory(!showHistory)
+    showToast.info(`Historial de asistencia para ficha ${selectedFicha}`)
   }
 
   const toggleAttendance = (learnerId) => {
@@ -55,9 +119,22 @@ export default function AttendanceManagementPage() {
   }
 
   const handleSaveAttendance = () => {
-    console.log('Guardando asistencia:', { date: selectedDate, ficha: selectedFicha, attendance })
-    // Lógica para guardar en API
-    alert('Asistencia guardada correctamente')
+    if (!selectedFicha) {
+      showAlert.warning('Validación', 'Por favor selecciona una ficha')
+      return
+    }
+    const toastId = showToast.loading('Guardando asistencia...')
+    try {
+      console.log('Guardando asistencia:', { date: selectedDate, ficha: selectedFicha, attendance })
+      // Lógica para guardar en API
+      setTimeout(() => {
+        showToast.dismiss(toastId)
+        showToast.success('Asistencia guardada correctamente')
+      }, 1000)
+    } catch (error) {
+      showToast.dismiss(toastId)
+      showToast.error('Error al guardar la asistencia')
+    }
   }
 
   const presentCount = Object.values(attendance).filter(v => v).length
@@ -122,19 +199,34 @@ export default function AttendanceManagementPage() {
               <div className="flex gap-2 w-full md:w-auto">
                 <Button
                   variant="outline"
-                  onClick={() => setShowHistory(!showHistory)}
+                  onClick={handleViewHistory}
                   className="flex items-center gap-2 flex-1 md:flex-none"
                 >
                   <History className="w-4 h-4" />
                   Historial
                 </Button>
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2 flex-1 md:flex-none"
-                >
-                  <Download className="w-4 h-4" />
-                  Descargar
-                </Button>
+                <div className="flex gap-1 flex-1 md:flex-none">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleExportData('excel')}
+                    className="flex items-center gap-2"
+                    title="Descargar en Excel"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span className="hidden sm:inline">Excel</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleExportData('pdf')}
+                    className="flex items-center gap-2"
+                    title="Descargar en PDF"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span className="hidden sm:inline">PDF</span>
+                  </Button>
+                </div>
                 <Button
                   onClick={handleSaveAttendance}
                   className="flex items-center gap-2 flex-1 md:flex-none"

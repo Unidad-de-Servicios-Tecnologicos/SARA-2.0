@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { FileText, AlertCircle } from "lucide-react";
+import { showToast, showAlert } from '@/shared/notifications';
 
 export default function DocumentsPage() {
   const location = useLocation();

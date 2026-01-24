@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { showToast, showAlert } from "@/shared/notifications";
 
@@ -88,17 +88,18 @@ export default function AddScheduleModal({ isOpen, onClose }) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <div className="w-full max-w-4xl">
-        {/* Header */}
-        <div className="pb-4 border-b dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Plan de trabajo
-          </h2>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="pb-4 border-b dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Plan de trabajo
+            </h2>
+          </div>
 
-        {/* Form */}
-        <div className="mt-6 space-y-4">
+          {/* Form */}
+          <div className="mt-6 space-y-4 overflow-y-auto max-h-[70vh]">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Competencia
@@ -227,7 +228,8 @@ export default function AddScheduleModal({ isOpen, onClose }) {
             Descargar plan de trabajo
           </button>
         </div>
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

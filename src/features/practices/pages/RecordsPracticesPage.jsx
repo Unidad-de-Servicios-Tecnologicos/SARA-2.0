@@ -1,10 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Briefcase, AlertCircle } from "lucide-react";
+import { showToast } from "@/shared/notifications";
 
 export default function RecordsPracticesPage() {
   const location = useLocation();
   const ficha = location.state?.ficha;
+
+  useEffect(() => {
+    if (ficha) {
+      showToast.info(`Mostrando prácticas de la ficha ${ficha.numero}`);
+    }
+  }, [ficha]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">

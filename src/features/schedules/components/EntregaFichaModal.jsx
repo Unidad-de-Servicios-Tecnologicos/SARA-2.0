@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { FileCheck, Calendar, User, ClipboardCheck, AlertCircle } from "lucide-react";
 import { showAlert, showToast } from "@/shared/notifications";
 
@@ -89,15 +89,16 @@ export default function EntregaFichaModal({ isOpen, onClose, fichaCode = "" }) {
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleCancel}>
-      <div className="w-full h-full flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* Header */}
-          <div className="flex items-center gap-3 pb-4 border-b dark:border-gray-700 mb-6">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
+    <Dialog open={isOpen} onOpenChange={handleCancel} hideCloseButton>
+      <DialogContent hideCloseButton>
+        <div className="w-full h-full flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-6">
+            {/* Header */}
+            <div className="flex items-center gap-3 pb-4 border-b dark:border-gray-700 mb-6">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Entrega de Ficha
               </h2>
@@ -209,7 +210,8 @@ export default function EntregaFichaModal({ isOpen, onClose, fichaCode = "" }) {
           </button>
           </div>
         </div>
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

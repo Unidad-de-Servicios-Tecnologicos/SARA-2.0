@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { BarChart3, TrendingUp, TrendingDown, Users, Award, AlertTriangle, CheckCircle } from "lucide-react";
 import {
   BarChart,
@@ -56,10 +56,11 @@ export default function RendimientoAcademicoModal({ isOpen, onClose, fichaCode =
   const tendenciaPositiva = tendencia >= 0;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center gap-3 pb-4 border-b dark:border-gray-700">
+    <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="flex items-center gap-3 pb-4 border-b dark:border-gray-700">
           <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
             <BarChart3 className="w-5 h-5 text-orange-600 dark:text-orange-400" />
           </div>
@@ -74,7 +75,7 @@ export default function RendimientoAcademicoModal({ isOpen, onClose, fichaCode =
         </div>
 
         {/* Contenido scrollable */}
-        <div className="flex-1 overflow-auto py-4">
+        <div className="flex-1 overflow-y-auto max-h-[70vh] py-4">
           {/* KPIs principales */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
@@ -229,7 +230,8 @@ export default function RendimientoAcademicoModal({ isOpen, onClose, fichaCode =
             Cerrar
           </button>
         </div>
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

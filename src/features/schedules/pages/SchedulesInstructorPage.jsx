@@ -15,6 +15,7 @@ import { AddKeywordFichaModal, AddKeywordInstructorModal } from "../components/A
 import { AllInstructorCalendarsModal, AllFichaCalendarsModal } from "../components/AllCalendarsModal";
 import RegistrarFichaModal from "../components/RegistrarFichaModal";
 import { showToast } from "@/shared/notifications";
+import { downloadExcel } from '@/utils/downloadExcel';
 
 export default function SchedulesInstructorPage() {
   const [searchValue, setSearchValue] = useState("");
@@ -46,7 +47,8 @@ export default function SchedulesInstructorPage() {
   const handleDownloadSchedule = async () => {
     try {
       setIsExporting(true);
-      const { ExportService } = await import("@/features/instructors/services/ExportService");
+      const toastId = showToast.loading('Exportando horario del instructor...');
+      
       // Datos de ejemplo del horario del instructor
       const scheduleData = [
         {
@@ -66,8 +68,29 @@ export default function SchedulesInstructorPage() {
           ambiente: "Lab 2"
         }
       ];
-      await ExportService.exportScheduleExcel('instructor', scheduleData);
-      showToast.success("Horario del Instructor exportado correctamente");
+
+      const columns = [
+        { key: 'instructor', label: 'Instructor' },
+        { key: 'dia', label: 'Día' },
+        { key: 'horaInicio', label: 'Hora Inicio' },
+        { key: 'horaFin', label: 'Hora Fin' },
+        { key: 'competencia', label: 'Competencia' },
+        { key: 'ambiente', label: 'Ambiente' }
+      ];
+
+      downloadExcel(
+        scheduleData,
+        columns,
+        `Horario del Instructor - ${searchValue || 'General'}`,
+        `horario_instructor_${searchValue || 'general'}_${new Date().toISOString().split('T')[0]}`,
+        {
+          subtitulo: `Período: ${periodo}`,
+          fecha: new Date().toLocaleDateString('es-CO')
+        }
+      );
+
+      showToast.dismiss(toastId);
+      showToast.success("Horario del Instructor descargado exitosamente");
     } catch (error) {
       showToast.error(error.message || "Error al exportar el horario");
       console.error("Error:", error);

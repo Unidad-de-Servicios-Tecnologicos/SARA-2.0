@@ -4,6 +4,8 @@ import { Search, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/card'
+import { showToast } from '@/shared/notifications'
+import { downloadExcel } from '@/utils/downloadExcel'
 
 export default function AcademicPerformancePage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -57,15 +59,69 @@ export default function AcademicPerformancePage() {
   const COLORS = ['#10b981', '#f59e0b', '#ef4444']
 
   const handleDownloadPerformance = () => {
-    // Generar PDF o Excel con reporte de desempeño
-    alert('Descargando reporte de rendimiento académico...')
+    try {
+      if (searchResults.length === 0) {
+        showToast.info('Sin resultados', 'No hay aprendices para descargar');
+        return;
+      }
+
+      const toastId = showToast.loading('Preparando reporte de desempeño...');
+
+      // Preparar datos de desempeño académico
+      const performanceData = searchResults.map(learner => ({
+        documento: learner.document,
+        nombre: learner.name,
+        ficha: learner.fichaId,
+        estado: learner.state,
+        desempeño: learner.performanceRating,
+        asistencia: `${learner.attendance}%`,
+        aprobados: learner.judgments.approved,
+        pendientes: learner.judgments.pending,
+        noAprobados: learner.judgments.notApproved
+      }));
+
+      const columns = [
+        { key: 'documento', label: 'Documento' },
+        { key: 'nombre', label: 'Nombre' },
+        { key: 'ficha', label: 'Ficha' },
+        { key: 'estado', label: 'Estado' },
+        { key: 'desempeño', label: 'Desempeño' },
+        { key: 'asistencia', label: 'Asistencia' },
+        { key: 'aprobados', label: 'Aprobados' },
+        { key: 'pendientes', label: 'Pendientes' },
+        { key: 'noAprobados', label: 'No Aprobados' }
+      ];
+
+      downloadExcel(
+        performanceData,
+        columns,
+        'Reporte de Rendimiento Académico',
+        `desempenio_${new Date().toISOString().split('T')[0]}`,
+        {
+          subtitulo: 'Análisis de desempeño de aprendices',
+          fecha: new Date().toLocaleDateString('es-CO'),
+          rowClassName: (row) => {
+            if (row.desempeño === 'Excelente') return 'bg-green-50';
+            if (row.desempeño === 'Bueno') return 'bg-blue-50';
+            if (row.desempeño === 'Regular') return 'bg-yellow-50';
+            return 'bg-red-50';
+          }
+        }
+      );
+
+      showToast.dismiss(toastId);
+      showToast.success(`Reporte de ${searchResults.length} aprendices descargado`);
+    } catch (error) {
+      console.error('Error al descargar:', error);
+      showToast.error('Error al descargar el reporte');
+    }
   }
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Rendimiento Académico</h1>
-        <p className="text-slate-600">Consulta el rendimiento y evaluaciones de aprendices</p>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Rendimiento Académico</h1>
+        <p className="text-slate-600 dark:text-gray-400">Consulta el rendimiento y evaluaciones de aprendices</p>
       </div>
 
         {/* Búsqueda */}

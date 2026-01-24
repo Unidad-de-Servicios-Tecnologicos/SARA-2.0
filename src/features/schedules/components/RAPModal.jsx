@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 
 // Mock data para los RAPs
 const mockRAPs = [
@@ -57,23 +57,24 @@ const mockRAPs = [
 
 export default function RAPModal({ isOpen, onClose, instructorName = "" }) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <div className="max-h-[80vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="pb-4 border-b dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Detalle Resultados de Aprendizajes
-          </h2>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="pb-4 border-b dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Detalle Resultados de Aprendizajes
+            </h2>
+          </div>
 
-        {instructorName && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            Instructor: <span className="font-medium">{instructorName}</span>
-          </p>
-        )}
+          {instructorName && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              Instructor: <span className="font-medium">{instructorName}</span>
+            </p>
+          )}
 
-        {/* Table */}
-        <div className="mt-4 overflow-auto flex-1">
+          {/* Table */}
+          <div className="mt-4 overflow-auto flex-1 max-h-[70vh]">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
               <tr>
@@ -148,7 +149,8 @@ export default function RAPModal({ isOpen, onClose, instructorName = "" }) {
             Cerrar
           </button>
         </div>
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

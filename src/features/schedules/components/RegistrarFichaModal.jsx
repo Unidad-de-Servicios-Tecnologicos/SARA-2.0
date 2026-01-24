@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
 import { CalendarPlus, Search, Calendar, Clock, MapPin, BookOpen } from "lucide-react";
@@ -95,16 +95,19 @@ export default function RegistrarFichaModal({ isOpen, onClose, instructorName = 
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      {/* Header */}
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
-          <CalendarPlus className="w-5 h-5 text-teal-600" />
-          Registrar Ficha al Instructor
-        </h2>
-      </div>
+    <Dialog open={isOpen} onOpenChange={handleClose} hideCloseButton>
+      <DialogContent hideCloseButton>
+        <div className="w-full overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="pb-4 border-b dark:border-gray-700">
+            <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
+              <CalendarPlus className="w-5 h-5 text-teal-600" />
+              Registrar Ficha al Instructor
+            </h2>
+          </div>
 
-      <div className="space-y-6">
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto max-h-[70vh] space-y-6 py-4">
         {/* Info del instructor */}
         {instructorName && (
           <div className="bg-teal-50 dark:bg-teal-900/30 p-3 rounded-lg">
@@ -290,7 +293,7 @@ export default function RegistrarFichaModal({ isOpen, onClose, instructorName = 
           )}
 
           {/* Botones de acción */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-600 flex justify-end gap-3">
             <Button
               variant="outline"
               onClick={handleClose}
@@ -307,7 +310,9 @@ export default function RegistrarFichaModal({ isOpen, onClose, instructorName = 
               Registrar Ficha
             </Button>
           </div>
-      </div>
+          </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

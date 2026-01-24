@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react'
-import { Plus, Search, Download, Filter, AlertTriangle, TrendingUp, Users, GraduationCap } from 'lucide-react'
+import { Plus, Search, Download, Filter, AlertTriangle, TrendingUp, Users, GraduationCap, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/card'
 import LearnerDetailModal from '../components/LearnerDetailModal'
 import LearnerFormModal from '../components/LearnerFormModal'
 import LearnerTable from '../components/LearnerTable'
-import { showToast } from '@/shared/notifications'
+import { showToast, showAlert } from '@/shared/notifications'
+import { downloadReport } from '@/utils/downloadReports'
 import Swal from 'sweetalert2'
 import { mockFichas } from '@/features/records/mock/records.mock'
 
@@ -259,10 +260,62 @@ export default function LearnersManagementPage() {
            (learner.fichaState === 'activa' || learner.fichaState === 'inicial')
   }
 
-  const handleDownloadReport = () => {
-    const csv = generateCSV(filteredLearners)
-    downloadFile(csv, 'aprendices.csv')
-    showToast.success('Reporte descargado correctamente')
+  const handleExportData = async (format) => {
+    if (!filteredLearners?.length) {
+      showAlert.warning('No hay datos para exportar')
+      return
+    }
+
+    const toastId = showToast.loading(`Preparando ${format.toUpperCase()}...`)
+    
+    try {
+      // Mapear datos al formato requerido
+      const dataToExport = filteredLearners.map(learner => ({
+        documento: learner.document || '',
+        nombre: learner.name || '',
+        email: learner.email || '',
+        ficha: learner.fichaId || '',
+        programa: learner.program || '',
+        desempeño: learner.academicPerformance || '',
+        asistencia: learner.attendance || '',
+        estado: learner.state || ''
+      }))
+
+      const columns = [
+        { key: 'documento', label: 'Documento' },
+        { key: 'nombre', label: 'Nombre' },
+        { key: 'email', label: 'Email' },
+        { key: 'ficha', label: 'Ficha' },
+        { key: 'programa', label: 'Programa' },
+        { key: 'desempeño', label: 'Desempeño' },
+        { key: 'asistencia', label: 'Asistencia' },
+        { key: 'estado', label: 'Estado' }
+      ]
+
+      await downloadReport(
+        dataToExport,
+        columns,
+        'Gestión de Aprendices',
+        `aprendices_${new Date().toISOString().split('T')[0]}`,
+        format,
+        {
+          subtitulo: 'Información detallada de aprendices registrados',
+          rowClassName: (row) => {
+            if (row.estado === 'EN FORMACIÓN') return 'bg-green-50'
+            if (row.estado === 'EGRESADO') return 'bg-blue-50'
+            if (row.estado === 'RETIRADO') return 'bg-red-50'
+            return 'bg-white'
+          }
+        }
+      )
+
+      showToast.dismiss(toastId)
+      showToast.success(`${dataToExport.length} registros exportados exitosamente`)
+    } catch (error) {
+      showToast.dismiss(toastId)
+      showToast.error('Error al exportar los datos')
+      console.error('Export error:', error)
+    }
   }
 
   const handleNewLearner = () => {
@@ -487,15 +540,28 @@ export default function LearnersManagementPage() {
               </Button>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadReport}
-                className="flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Exportar
-              </Button>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExportData('excel')}
+                  className="flex items-center gap-2"
+                  title="Descargar en Excel"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">Excel</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExportData('pdf')}
+                  className="flex items-center gap-2"
+                  title="Descargar en PDF"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span className="hidden sm:inline">PDF</span>
+                </Button>
+              </div>
               <Button
                 size="sm"
                 onClick={handleNewLearner}

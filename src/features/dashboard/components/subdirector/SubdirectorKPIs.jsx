@@ -1,5 +1,7 @@
 import KPIBox from "../common/KPIBox"
 import { useAuthStore } from "@/features/auth/store/useAuth";
+import { usePermissionStore } from "@/features/auth/store/usePermissionStore";
+import { ROLE_METADATA } from "@/config/permissions";
 
 const kpiData = [
   { label: "Fichas", value: 97 },
@@ -10,6 +12,8 @@ const kpiData = [
 
 export default function SubdirectorKPIs() {
   const user = useAuthStore((s) => s.user);
+  const userRole = usePermissionStore((s) => s.userRole);
+  const roleInfo = ROLE_METADATA[userRole];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
@@ -17,7 +21,9 @@ export default function SubdirectorKPIs() {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-gray-800 dark:text-white">Bienvenido</h2>
-          <p className="text-gray-600 dark:text-gray-300 uppercase text-sm">{user?.name ?? "MIGUEL ANGEL CASTAÑO"}</p>
+          <p className="text-gray-600 dark:text-gray-300 uppercase text-sm">
+            <span>{roleInfo?.icon || "❓"}</span> {roleInfo?.label || userRole}
+          </p>
         </div>
         <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
           {user?.avatar ? (
