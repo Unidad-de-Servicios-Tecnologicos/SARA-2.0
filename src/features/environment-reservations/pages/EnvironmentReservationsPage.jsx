@@ -1,286 +1,219 @@
 import { useState } from 'react'
-import { Camera, Plus, Trash2, Check, Clock } from 'lucide-react'
+import { Plus, Eye, Pencil, Ban, QrCode, Check, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/card'
-import { showToast, showAlert } from '@/shared/notifications'
+import RegisterReservationModal from '@/features/environment-reservations/components/RegisterReservationModal'
+import EditReservationModal from '@/features/environment-reservations/components/EditReservationModal'
+import ViewReservationModal from '@/features/environment-reservations/components/ViewReservationModal'
+import CancelReservationModal from '@/features/environment-reservations/components/CancelReservationModal'
+import QRUsageModal from '@/features/environment-reservations/components/QRUsageModal'
+import { EnvironmentReservationsService } from '@/features/environment-reservations/services/EnvironmentReservationsService'
 
 export default function EnvironmentReservationsPage() {
-  const [qrInput, setQrInput] = useState('')
-  const [selectedEnvironment, setSelectedEnvironment] = useState(null)
-  const [reservations, setReservations] = useState([])
-  const [showQRReader, setShowQRReader] = useState(false)
-  const [formData, setFormData] = useState({
-    startTime: '',
-    endTime: '',
-    purpose: ''
+  const [viewMode, setViewMode] = useState('ambiente') // ambiente | instructor | ficha
+
+  const initialReservations = EnvironmentReservationsService.getReservations()
+
+  const [reservations, setReservations] = useState(initialReservations)
+  const [selectedReservation, setSelectedReservation] = useState(null)
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isViewOpen, setIsViewOpen] = useState(false)
+  const [isCancelOpen, setIsCancelOpen] = useState(false)
+  const [isQROpen, setIsQROpen] = useState(false)
+
+  const handleCreateReservation = (data) => {
+    const nextId = reservations.length ? Math.max(...reservations.map((r) => r.id)) + 1 : 1
+    const nueva = {
+      id: nextId,
+      ...data,
+    }
+    setReservations((prev) => [...prev, nueva])
+  }
+
+  const handleUpdateReservation = (updated) => {
+    setReservations((prev) => prev.map((r) => (r.id === updated.id ? updated : r)))
+  }
+
+  const handleCancelReservation = (cancelData) => {
+    if (!selectedReservation) return
+    setReservations((prev) =>
+      prev.map((r) =>
+        r.id === selectedReservation.id
+          ? { ...r, estado: 'CANCELADA', observacion: cancelData.observacion, motivoCancelacion: cancelData.motivo }
+          : r,
+      ),
+    )
+  }
+
+  const handleConfirmUsage = (usageData) => {
+    if (!selectedReservation) return
+    setReservations((prev) =>
+      prev.map((r) =>
+        r.id === selectedReservation.id
+          ? { ...r, estado: 'UTILIZADA', observacionUso: usageData.observacion }
+          : r,
+      ),
+    )
+  }
+
+  const filteredReservations = [...reservations].sort((a, b) => {
+    if (viewMode === 'ambiente') return a.ambiente.localeCompare(b.ambiente)
+    if (viewMode === 'instructor') return a.instructor.localeCompare(b.instructor)
+    if (viewMode === 'ficha') return a.ficha.localeCompare(b.ficha)
+    return 0
   })
-
-  // Mock QR codes
-  const qrCodes = {
-    'QR-101-CESGE': {
-      id: '101',
-      name: 'Aula 101',
-      sede: 'CESGE',
-      capacity: 30,
-      type: 'Aula'
-    },
-    'QR-401-CESGE': {
-      id: '401',
-      name: 'Laboratorio 401',
-      sede: 'CESGE',
-      capacity: 25,
-      type: 'Laboratorio'
-    },
-    'QR-201-IUSH': {
-      id: '201',
-      name: 'Aula 201',
-      sede: 'IUSH',
-      capacity: 35,
-      type: 'Aula'
-    }
-  }
-
-  const mockReservations = [
-    {
-      id: 1,
-      environment: 'Aula 101',
-      sede: 'CESGE',
-      date: '2025-01-22',
-      startTime: '08:00',
-      endTime: '10:00',
-      purpose: 'Clase de Administración Empresarial',
-      instructor: 'Miguel Ángel Castaño',
-      status: 'CONFIRMADA'
-    },
-    {
-      id: 2,
-      environment: 'Laboratorio 401',
-      sede: 'CESGE',
-      date: '2025-01-22',
-      startTime: '14:00',
-      endTime: '16:00',
-      purpose: 'Práctica de Sistemas',
-      instructor: 'Laura García López',
-      status: 'PENDIENTE'
-    }
-  ]
-
-  const handleQRRead = () => {
-    // Simular lectura de QR
-    if (qrInput && qrCodes[qrInput]) {
-      setSelectedEnvironment(qrCodes[qrInput])
-      setShowQRReader(false)
-      setQrInput('')
-      showToast.success('Código QR reconocido')
-    } else {
-      showAlert.warning('QR no reconocido. Intenta con: QR-101-CESGE, QR-401-CESGE o QR-201-IUSH')
-    }
-  }
-
-  const handleSaveReservation = () => {
-    if (!selectedEnvironment || !formData.startTime || !formData.endTime || !formData.purpose) {
-      showAlert.warning('Por favor completa todos los campos')
-      return
-    }
-
-    const newReservation = {
-      id: reservations.length + 1,
-      environment: selectedEnvironment.name,
-      sede: selectedEnvironment.sede,
-      date: new Date().toISOString().split('T')[0],
-      startTime: formData.startTime,
-      endTime: formData.endTime,
-      purpose: formData.purpose,
-      instructor: 'Usuario Actual',
-      status: 'PENDIENTE'
-    }
-
-    setReservations([...reservations, newReservation])
-    setSelectedEnvironment(null)
-    setFormData({ startTime: '', endTime: '', purpose: '' })
-    showToast.success('Reserva guardada correctamente')
-  }
-
-  const handleDeleteReservation = (id) => {
-    setReservations(reservations.filter(r => r.id !== id))
-  }
-
-  const allReservations = [...mockReservations, ...reservations]
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Reserva de Ambientes</h1>
-        <p className="text-slate-600 dark:text-gray-400">Escanea códigos QR para reservar espacios de formación</p>
+        <p className="text-slate-600 dark:text-gray-400">
+          Gestión académica de reservas de ambientes. La creación, edición y cancelación se realiza mediante modales.
+        </p>
+      </div>
+      {/* Barra de acciones y vista */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div className="inline-flex rounded-lg border border-slate-200 bg-white overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setViewMode('ambiente')}
+            className={`px-4 py-2 text-sm font-medium ${
+              viewMode === 'ambiente'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            Por ambiente
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('instructor')}
+            className={`px-4 py-2 text-sm font-medium border-l border-slate-200 ${
+              viewMode === 'instructor'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            Por instructor
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('ficha')}
+            className={`px-4 py-2 text-sm font-medium border-l border-slate-200 ${
+              viewMode === 'ficha'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            Por ficha
+          </button>
+        </div>
+
+        <Button
+          onClick={() => setIsRegisterOpen(true)}
+          className="inline-flex items-center gap-2 self-start md:self-auto"
+        >
+          <Plus className="w-4 h-4" />
+          Registrar reserva
+        </Button>
       </div>
 
-      {/* Panel de Escaneo QR */}
-        <Card className="mb-6 p-6 bg-white">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Escanear Código QR</h2>
-          
-          {!showQRReader && !selectedEnvironment && (
-            <div className="text-center py-8">
-              <Button
-                onClick={() => setShowQRReader(true)}
-                size="lg"
-                className="flex items-center gap-2 mx-auto"
-              >
-                <Camera className="w-5 h-5" />
-                Leer QR
-              </Button>
-              <p className="text-sm text-slate-600 mt-4">O ingresa el código manualmente</p>
-            </div>
-          )}
-
-          {showQRReader && (
-            <div className="space-y-4">
-              <div className="bg-slate-100 p-4 rounded-lg border-2 border-dashed border-slate-300">
-                <p className="text-center text-slate-600 py-12">
-                  📷 Cámara del dispositivo se activaría aquí
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="O ingresa el código QR manualmente"
-                  value={qrInput}
-                  onChange={(e) => setQrInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleQRRead()}
-                />
-                <Button onClick={handleQRRead}>Procesar</Button>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowQRReader(false)}
-                className="w-full"
-              >
-                Cerrar Cámara
-              </Button>
-            </div>
-          )}
-
-          {/* Ambiente Seleccionado */}
-          {selectedEnvironment && (
-            <div className="space-y-4 border-t border-slate-200 pt-4 mt-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-blue-600 mb-2">Ambiente Seleccionado</p>
-                <p className="text-lg font-semibold text-slate-900">{selectedEnvironment.name}</p>
-                <p className="text-sm text-slate-600">
-                  {selectedEnvironment.sede} | Capacidad: {selectedEnvironment.capacity} personas
-                </p>
-              </div>
-
-              {/* Formulario de Reserva */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Hora de Inicio</label>
-                  <Input
-                    type="time"
-                    value={formData.startTime}
-                    onChange={(e) => setFormData({...formData, startTime: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Hora de Finalización</label>
-                  <Input
-                    type="time"
-                    value={formData.endTime}
-                    onChange={(e) => setFormData({...formData, endTime: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Propósito de la Reserva</label>
-                  <textarea
-                    value={formData.purpose}
-                    onChange={(e) => setFormData({...formData, purpose: e.target.value})}
-                    placeholder="Describe el propósito de la reserva"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    rows="3"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleSaveReservation}
-                  className="flex-1 flex items-center justify-center gap-2"
-                >
-                  <Check className="w-4 h-4" />
-                  Guardar Reserva
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedEnvironment(null)
-                    setFormData({ startTime: '', endTime: '', purpose: '' })
-                  }}
-                  className="flex-1"
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          )}
-        </Card>
-
-        {/* Reservas Activas */}
+      {/* Reservas */}
         <Card className="bg-white">
           <div className="p-6 border-b border-slate-200">
             <h2 className="text-lg font-semibold text-slate-900">Mis Reservas</h2>
-            <p className="text-sm text-slate-600">Total: {allReservations.length} reservas</p>
+            <p className="text-sm text-slate-600">Total: {filteredReservations.length} reservas</p>
           </div>
 
-          {allReservations.length > 0 ? (
+          {filteredReservations.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Ficha</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Instructor</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Ambiente</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Sede</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Fecha</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Hora</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Propósito</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Instructor</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Competencia</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">RAP</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Estado</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {allReservations.map((reservation) => (
+                  {filteredReservations.map((reservation) => (
                     <tr key={reservation.id} className="border-b border-slate-200 hover:bg-slate-50">
-                      <td className="px-6 py-4 text-sm font-medium text-slate-900">{reservation.environment}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{reservation.sede}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{reservation.date}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">
-                        {reservation.startTime} - {reservation.endTime}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{reservation.purpose}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-slate-900">{reservation.ficha}</td>
                       <td className="px-6 py-4 text-sm text-slate-600">{reservation.instructor}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{reservation.ambiente}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{reservation.fecha}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {reservation.horaInicio} - {reservation.horaFin}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{reservation.competencia}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{reservation.rap}</td>
                       <td className="px-6 py-4 text-sm">
                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
-                          reservation.status === 'CONFIRMADA' 
-                            ? 'bg-green-100 text-green-800' 
+                          reservation.estado === 'CONFIRMADA'
+                            ? 'bg-green-100 text-green-800'
+                            : reservation.estado === 'CANCELADA'
+                            ? 'bg-red-100 text-red-800'
+                            : reservation.estado === 'UTILIZADA'
+                            ? 'bg-emerald-100 text-emerald-800'
                             : 'bg-yellow-100 text-yellow-800'
                         }`}>
-                          {reservation.status === 'CONFIRMADA' ? (
-                            <Check className="w-3 h-3" />
-                          ) : (
-                            <Clock className="w-3 h-3" />
-                          )}
-                          {reservation.status}
+                          {reservation.estado === 'CONFIRMADA' && <Check className="w-3 h-3" />}
+                          {reservation.estado === 'PENDIENTE' && <Clock className="w-3 h-3" />}
+                          {reservation.estado === 'CANCELADA' && <Ban className="w-3 h-3" />}
+                          {reservation.estado === 'UTILIZADA' && <Check className="w-3 h-3" />}
+                          {reservation.estado}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        {!mockReservations.find(r => r.id === reservation.id) && (
+                        <div className="flex items-center gap-1">
                           <button
-                            onClick={() => handleDeleteReservation(reservation.id)}
-                            className="p-1.5 hover:bg-red-100 rounded-md transition text-red-600"
-                            title="Eliminar"
+                            onClick={() => {
+                              setSelectedReservation(reservation)
+                              setIsViewOpen(true)
+                            }}
+                            className="p-1.5 hover:bg-slate-100 rounded-md transition text-slate-700"
+                            title="Ver detalle"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Eye className="w-4 h-4" />
                           </button>
-                        )}
+                          <button
+                            onClick={() => {
+                              setSelectedReservation(reservation)
+                              setIsEditOpen(true)
+                            }}
+                            className="p-1.5 hover:bg-blue-100 rounded-md transition text-blue-600"
+                            title="Editar reserva"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedReservation(reservation)
+                              setIsCancelOpen(true)
+                            }}
+                            className="p-1.5 hover:bg-red-100 rounded-md transition text-red-600"
+                            title="Cancelar / liberar reserva"
+                          >
+                            <Ban className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedReservation(reservation)
+                              setIsQROpen(true)
+                            }}
+                            className="p-1.5 hover:bg-emerald-100 rounded-md transition text-emerald-600"
+                            title="Registro de uso por QR"
+                          >
+                            <QrCode className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -293,6 +226,42 @@ export default function EnvironmentReservationsPage() {
             </div>
           )}
         </Card>
+
+        {/* Modales oficiales del módulo */}
+        <RegisterReservationModal
+          isOpen={isRegisterOpen}
+          onClose={() => setIsRegisterOpen(false)}
+          onSave={handleCreateReservation}
+          existingReservations={reservations}
+        />
+
+        <EditReservationModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          reservation={selectedReservation}
+          onSave={handleUpdateReservation}
+          existingReservations={reservations}
+        />
+
+        <ViewReservationModal
+          isOpen={isViewOpen}
+          onClose={() => setIsViewOpen(false)}
+          reservation={selectedReservation}
+        />
+
+        <CancelReservationModal
+          isOpen={isCancelOpen}
+          onClose={() => setIsCancelOpen(false)}
+          reservation={selectedReservation}
+          onConfirm={handleCancelReservation}
+        />
+
+        <QRUsageModal
+          isOpen={isQROpen}
+          onClose={() => setIsQROpen(false)}
+          reservation={selectedReservation}
+          onConfirm={handleConfirmUsage}
+        />
     </div>
   )
 }
