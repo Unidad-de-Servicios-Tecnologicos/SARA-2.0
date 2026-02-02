@@ -24,10 +24,10 @@ import RendimientoAcademicoModal from "../components/RendimientoAcademicoModal";
 import { showToast, showAlert } from "@/shared/notifications";
 import { downloadReport } from '@/utils/downloadReports';
 
-export default function SchedulesRecordPage() {
+export default function SchedulesRecordPage({ initialFichaNumber }) {
   const { fichaNumero } = useParams(); // Obtener número de ficha de la ruta
   const location = useLocation();
-  const initialSearchValue = fichaNumero || location.state?.initialSearchValue || location.state?.ficha?.numero || "";
+  const initialSearchValue = initialFichaNumber || fichaNumero || location.state?.initialSearchValue || location.state?.ficha?.numero || "";
   
   const [searchValue, setSearchValue] = useState(initialSearchValue);
   const [periodo, setPeriodo] = useState("2024 - 4");
@@ -333,16 +333,20 @@ export default function SchedulesRecordPage() {
       <RAPModal 
         isOpen={showRAPModal} 
         onClose={() => setShowRAPModal(false)}
+        fichaCode={searchValue}
       />
       
       <AddScheduleModal
         isOpen={showScheduleModal}
         onClose={() => setShowScheduleModal(false)}
+        fichaCode={searchValue}
+        instructorName="Instructor titular"
       />
       
       <AddKeywordFichaModal
         isOpen={showKeywordFichaModal}
         onClose={() => setShowKeywordFichaModal(false)}
+        defaultEntidad={searchValue}
       />
       
       <AllInstructorCalendarsModal

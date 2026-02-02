@@ -1,315 +1,278 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/button";
-import { CalendarPlus, Search, Calendar, Clock, MapPin, BookOpen } from "lucide-react";
+import { CalendarPlus } from "lucide-react";
 import { showAlert } from "@/shared/notifications";
 
+// Mock de fichas activas disponibles
+const fichasDisponibles = [
+  { id: 1, numero: "2889927", programa: "Análisis y Desarrollo de Software", trimestre: "1" },
+  { id: 2, numero: "2889928", programa: "Producción Multimedia", trimestre: "2" },
+  { id: 3, numero: "2889929", programa: "Gestión Administrativa", trimestre: "3" },
+  { id: 4, numero: "2889930", programa: "Contabilidad y Finanzas", trimestre: "4" },
+  { id: 5, numero: "2889931", programa: "Mercadeo", trimestre: "1" },
+];
+
+const MAX_HORAS_SEMANALES = 40;
+
 export default function RegistrarFichaModal({ isOpen, onClose, instructorName = "" }) {
-  const [searchFicha, setSearchFicha] = useState("");
-  const [selectedFicha, setSelectedFicha] = useState(null);
-  const [formData, setFormData] = useState({
-    fechaInicio: "",
-    fechaFin: "",
-    horaInicio: "07:00",
-    horaFin: "13:00",
-    ambiente: "",
-    diasSemana: [],
-    observaciones: ""
-  });
+  const [selectedFichaId, setSelectedFichaId] = useState("");
+  const [rol, setRol] = useState("titular");
+  const [horasAsignadas, setHorasAsignadas] = useState("");
+  const [trimestre, setTrimestre] = useState("");
 
-  // Mock de fichas disponibles
-  const fichasDisponibles = [
-    { id: 1, numero: "2889927", programa: "Análisis y Desarrollo de Software", jornada: "Diurna", fase: "Ejecución" },
-    { id: 2, numero: "2889928", programa: "Producción Multimedia", jornada: "Nocturna", fase: "Lectiva" },
-    { id: 3, numero: "2889929", programa: "Gestión Administrativa", jornada: "Mixta", fase: "Ejecución" },
-    { id: 4, numero: "2889930", programa: "Contabilidad y Finanzas", jornada: "Diurna", fase: "Lectiva" },
-    { id: 5, numero: "2889931", programa: "Mercadeo", jornada: "Nocturna", fase: "Productiva" },
-  ];
+  // Registro simple en memoria para evitar duplicados en la misma sesión
+  const asignacionesRef = useRef([]);
 
-  const diasSemanaOptions = [
-    { id: "lunes", label: "L" },
-    { id: "martes", label: "M" },
-    { id: "miercoles", label: "M" },
-    { id: "jueves", label: "J" },
-    { id: "viernes", label: "V" },
-    { id: "sabado", label: "S" },
-    { id: "domingo", label: "D" },
-  ];
+  const fichaSeleccionada = fichasDisponibles.find((f) => String(f.id) === String(selectedFichaId));
 
-  const filteredFichas = fichasDisponibles.filter(
-    ficha => ficha.numero.includes(searchFicha) || 
-             ficha.programa.toLowerCase().includes(searchFicha.toLowerCase())
-  );
-
-  const handleDiaToggle = (diaId) => {
-    setFormData(prev => ({
-      ...prev,
-      diasSemana: prev.diasSemana.includes(diaId)
-        ? prev.diasSemana.filter(d => d !== diaId)
-        : [...prev.diasSemana, diaId]
-    }));
-  };
-
-  const handleSave = () => {
-    if (!selectedFicha) {
-      showAlert.warning("Seleccione una ficha", "Debe seleccionar una ficha para registrar");
+  const handleSave = async () => {
+    if (!instructorName) {
+      showAlert.warning("Instructor requerido", "No hay un instructor seleccionado para la asignación.");
       return;
     }
 
-    if (!formData.fechaInicio || !formData.fechaFin) {
-      showAlert.warning("Fechas requeridas", "Debe ingresar las fechas de inicio y fin");
+    if (!selectedFichaId) {
+      showAlert.warning("Ficha requerida", "Debe seleccionar una ficha activa.");
       return;
     }
 
-    if (formData.diasSemana.length === 0) {
-      showAlert.warning("Días requeridos", "Debe seleccionar al menos un día de la semana");
+    if (!rol) {
+      showAlert.warning("Rol requerido", "Debe seleccionar el rol en la ficha.");
       return;
     }
 
-    // Cerrar modal primero
+    const horas = Number(horasAsignadas);
+    if (!horas || horas <= 0) {
+      showAlert.warning("Horas inválidas", "Las horas asignadas deben ser mayores a 0.");
+      return;
+    }
+
+    if (horas > MAX_HORAS_SEMANALES) {
+      showAlert.warning(
+        "Límite de horas",
+        `Las horas asignadas no pueden superar ${MAX_HORAS_SEMANALES} horas semanales.`,
+      );
+      return;
+    }
+
+    if (!trimestre) {
+      showAlert.warning("Trimestre requerido", "Debe seleccionar el trimestre.");
+      return;
+    }
+
+    const fichaNumero = fichaSeleccionada?.numero || "";
+
+    // Validación simple en memoria: no duplicar ficha-instructor
+    const existeAsignacion = asignacionesRef.current.some(
+      (a) => a.instructor === instructorName && a.ficha === fichaNumero,
+    );
+
+    if (existeAsignacion) {
+      showAlert.warning(
+        "Asignación duplicada",
+        `La ficha ${fichaNumero} ya está asignada al instructor ${instructorName}.`,
+      );
+      return;
+    }
+
+    // Validación simple: solo un titular por ficha en esta sesión
+    if (rol === "titular") {
+      const yaTieneTitular = asignacionesRef.current.some(
+        (a) => a.ficha === fichaNumero && a.rol === "titular",
+      );
+
+      if (yaTieneTitular) {
+        showAlert.warning(
+          "Titular existente",
+          `La ficha ${fichaNumero} ya tiene un instructor titular registrado.`,
+        );
+        return;
+      }
+    }
+
+    const nuevaAsignacion = {
+      instructor: instructorName,
+      ficha: fichaNumero,
+      programa: fichaSeleccionada?.programa || "",
+      rol,
+      horasAsignadas: horas,
+      trimestre,
+    };
+
+    asignacionesRef.current = [...asignacionesRef.current, nuevaAsignacion];
+
     onClose();
 
-    // Mostrar confirmación después
-    setTimeout(() => {
-      showAlert.success(
-        "Ficha registrada",
-        `La ficha ${selectedFicha.numero} ha sido asignada al instructor correctamente`
+    setTimeout(async () => {
+      const confirmado = await showAlert.confirm(
+        "Confirmar registro",
+        `¿Desea registrar la ficha ${fichaNumero} al instructor ${instructorName}?`,
+        "Registrar",
       );
+
+      if (confirmado) {
+        console.log("Asignación ficha-instructor:", nuevaAsignacion);
+        await showAlert.success(
+          "Ficha registrada",
+          `La ficha ${fichaNumero} ha sido registrada para el instructor ${instructorName}.`,
+        );
+      }
     }, 100);
+
+    setSelectedFichaId("");
+    setRol("titular");
+    setHorasAsignadas("");
+    setTrimestre("");
   };
 
-  const handleClose = () => {
-    setSearchFicha("");
-    setSelectedFicha(null);
-    setFormData({
-      fechaInicio: "",
-      fechaFin: "",
-      horaInicio: "07:00",
-      horaFin: "13:00",
-      ambiente: "",
-      diasSemana: [],
-      observaciones: ""
-    });
+  const handleCancel = () => {
+    setSelectedFichaId("");
+    setRol("titular");
+    setHorasAsignadas("");
+    setTrimestre("");
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose} hideCloseButton>
-      <DialogContent hideCloseButton>
+    <Dialog open={isOpen} onOpenChange={handleCancel} hideCloseButton>
+      <DialogContent hideCloseButton className="max-w-3xl">
         <div className="w-full overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="pb-4 border-b dark:border-gray-700">
-            <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
-              <CalendarPlus className="w-5 h-5 text-teal-600" />
-              Registrar Ficha al Instructor
-            </h2>
+          <div className="pb-4 border-b dark:border-gray-700 flex items-center gap-2">
+            <div className="p-2 bg-teal-50 dark:bg-teal-900/30 rounded-lg">
+              <CalendarPlus className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Registrar ficha al instructor
+              </h2>
+              {instructorName && (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Instructor: <span className="font-medium">{instructorName}</span>
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto max-h-[70vh] space-y-6 py-4">
-        {/* Info del instructor */}
-        {instructorName && (
-          <div className="bg-teal-50 dark:bg-teal-900/30 p-3 rounded-lg">
-            <p className="text-sm text-teal-700 dark:text-teal-300">
-              <span className="font-medium">Instructor:</span> {instructorName}
-            </p>
-          </div>
-        )}
-
-        {/* Buscador de ficha */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Buscar Ficha
-          </label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
+          {/* Formulario */}
+          <div className="mt-6 space-y-4 overflow-y-auto max-h-[70vh]">
+            {/* Instructor (label) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Instructor
+              </label>
+              <input
                 type="text"
-                placeholder="Buscar por número de ficha o programa..."
-                value={searchFicha}
-                onChange={(e) => setSearchFicha(e.target.value)}
-                className="pl-10 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                value={instructorName || "Sin instructor seleccionado"}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
               />
             </div>
 
-            {/* Lista de fichas */}
-            <div className="mt-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg">
-              {filteredFichas.map((ficha) => (
-                <div
-                  key={ficha.id}
-                  onClick={() => setSelectedFicha(ficha)}
-                  className={`p-3 cursor-pointer border-b last:border-b-0 transition-colors ${
-                    selectedFicha?.id === ficha.id
-                      ? "bg-teal-50 dark:bg-teal-900/30"
-                      : "hover:bg-gray-50 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        Ficha {ficha.numero}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {ficha.programa}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-                        {ficha.jornada}
-                      </span>
-                      <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
-                        {ficha.fase}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {filteredFichas.length === 0 && (
-                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                  No se encontraron fichas
-                </div>
-              )}
+            {/* Ficha */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Ficha *
+              </label>
+              <select
+                value={selectedFichaId}
+                onChange={(e) => {
+                  const nuevaFichaId = e.target.value;
+                  setSelectedFichaId(nuevaFichaId);
+                  const ficha = fichasDisponibles.find((f) => String(f.id) === String(nuevaFichaId));
+                  setTrimestre(ficha?.trimestre || "");
+                }}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+              >
+                <option value="">Seleccione una ficha activa</option>
+                {fichasDisponibles.map((ficha) => (
+                  <option key={ficha.id} value={ficha.id}>
+                    {ficha.numero} - {ficha.programa}
+                  </option>
+                ))}
+              </select>
             </div>
-        </div>
 
-        {/* Formulario de programación */}
-        {selectedFicha && (
-            <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-              <h4 className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                Programación para Ficha {selectedFicha.numero}
-              </h4>
-
-              {/* Fechas */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    <Calendar className="w-4 h-4 inline mr-1" />
-                    Fecha Inicio
-                  </label>
-                  <Input
-                    type="date"
-                    value={formData.fechaInicio}
-                    onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
-                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    <Calendar className="w-4 h-4 inline mr-1" />
-                    Fecha Fin
-                  </label>
-                  <Input
-                    type="date"
-                    value={formData.fechaFin}
-                    onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
-                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Horario */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    <Clock className="w-4 h-4 inline mr-1" />
-                    Hora Inicio
-                  </label>
-                  <Input
-                    type="time"
-                    value={formData.horaInicio}
-                    onChange={(e) => setFormData({ ...formData, horaInicio: e.target.value })}
-                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    <Clock className="w-4 h-4 inline mr-1" />
-                    Hora Fin
-                  </label>
-                  <Input
-                    type="time"
-                    value={formData.horaFin}
-                    onChange={(e) => setFormData({ ...formData, horaFin: e.target.value })}
-                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Ambiente */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  <MapPin className="w-4 h-4 inline mr-1" />
-                  Ambiente
-                </label>
-                <Input
-                  type="text"
-                  placeholder="Ej: Ambiente 401, Laboratorio TIC"
-                  value={formData.ambiente}
-                  onChange={(e) => setFormData({ ...formData, ambiente: e.target.value })}
-                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-
-              {/* Días de la semana */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Días de la Semana
-                </label>
-                <div className="flex gap-2 flex-wrap">
-                  {diasSemanaOptions.map((dia) => (
-                    <button
-                      key={dia.id}
-                      type="button"
-                      onClick={() => handleDiaToggle(dia.id)}
-                      translate="no"
-                      className={`w-10 h-10 shrink-0 flex items-center justify-center rounded-full font-medium text-sm transition-colors ${
-                        formData.diasSemana.includes(dia.id)
-                          ? "bg-teal-600 text-white"
-                          : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                      }`}
-                    >
-                      <span className="notranslate">{dia.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Observaciones */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Observaciones
-                </label>
-                <textarea
-                  rows={2}
-                  value={formData.observaciones}
-                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                  placeholder="Observaciones adicionales..."
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:text-white"
-                />
-              </div>
+            {/* Programa (autocompletado según ficha) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Programa
+              </label>
+              <input
+                type="text"
+                value={fichaSeleccionada?.programa || "Seleccione una ficha"}
+                disabled
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+              />
             </div>
-          )}
 
-          {/* Botones de acción */}
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-600 flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              className="dark:border-gray-600 dark:text-gray-300"
+            {/* Rol en la ficha */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Rol en la ficha *
+              </label>
+              <select
+                value={rol}
+                onChange={(e) => setRol(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+              >
+                <option value="titular">Titular</option>
+                <option value="apoyo">Apoyo</option>
+              </select>
+            </div>
+
+            {/* Horas asignadas */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Horas asignadas *
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={horasAsignadas}
+                onChange={(e) => setHorasAsignadas(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+              />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Máximo permitido: {MAX_HORAS_SEMANALES} horas semanales.
+              </p>
+            </div>
+
+            {/* Trimestre */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Trimestre *
+              </label>
+              <select
+                value={trimestre}
+                onChange={(e) => setTrimestre(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+              >
+                <option value="">Seleccione un trimestre</option>
+                <option value="1">Trimestre 1</option>
+                <option value="2">Trimestre 2</option>
+                <option value="3">Trimestre 3</option>
+                <option value="4">Trimestre 4</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700 mt-4">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               Cancelar
-            </Button>
-            <Button
+            </button>
+            <button
+              type="button"
               onClick={handleSave}
-              disabled={!selectedFicha}
-              className="bg-teal-600 hover:bg-teal-700 text-white"
+              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
             >
-              <CalendarPlus className="w-4 h-4 mr-2" />
-              Registrar Ficha
-            </Button>
-          </div>
+              Registrar
+            </button>
           </div>
         </div>
       </DialogContent>

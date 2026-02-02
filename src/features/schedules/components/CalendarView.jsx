@@ -13,7 +13,10 @@ const mockEvents = [
     day: 2, // martes
     startHour: 6,
     endHour: 8,
-    color: "bg-blue-500"
+    color: "bg-blue-500",
+    competencia: "Estrategia documental",
+    rap: "RA1",
+    ambiente: "Ambiente 401"
   },
   {
     id: 2,
@@ -22,7 +25,10 @@ const mockEvents = [
     day: 3, // miércoles
     startHour: 7,
     endHour: 10,
-    color: "bg-blue-600"
+    color: "bg-blue-600",
+    competencia: "Elaboración de recursos",
+    rap: "RA2",
+    ambiente: "Lab TIC 2"
   },
   {
     id: 3,
@@ -31,14 +37,18 @@ const mockEvents = [
     day: 4, // jueves
     startHour: 6,
     endHour: 9,
-    color: "bg-blue-500"
+    color: "bg-blue-500",
+    competencia: "Reconocimiento de procesos",
+    rap: "RA3",
+    ambiente: "Ambiente 305"
   }
 ];
 
 export default function CalendarView({ 
   events = mockEvents, 
   showViewSelector = true,
-  compact = false
+  compact = false,
+  onEventClick,
 }) {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 8, 1)); // Sept 2025
   const [view, setView] = useState("week");
@@ -176,6 +186,7 @@ export default function CalendarView({
                       {event && isEventStart && (
                         <div
                           className={`absolute inset-x-0 mx-1 ${event.color} text-white text-xs p-1 rounded-t overflow-hidden z-5`}
+                          onClick={() => onEventClick && onEventClick(event)}
                           style={{
                             height: `${(event.endHour - event.startHour) * 32}px`
                           }}

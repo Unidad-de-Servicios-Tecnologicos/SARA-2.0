@@ -1,44 +1,69 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
-import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { showToast, showAlert } from "@/shared/notifications";
 
-export default function AddScheduleModal({ isOpen, onClose }) {
+// Mock simple de datos para selects
+const competenciasMock = [
+  "Desarrollo de software",
+  "Gestión administrativa",
+  "Gestión logística",
+  "Contabilización de operaciones"
+];
+
+const rapMock = [
+  "Implementar soluciones de software",
+  "Organizar documentación",
+  "Planear rutas de abastecimiento",
+  "Registrar hechos económicos"
+];
+
+const ambientesMock = [
+  "Ambiente 401 - Software",
+  "Ambiente 210 - Gestión",
+  "Laboratorio TIC",
+  "Aula 305"
+];
+
+export default function AddScheduleModal({ isOpen, onClose, fichaCode = "", instructorName = "" }) {
   const [formData, setFormData] = useState({
+    ficha: fichaCode || "",
+    instructor: instructorName || "",
+    fecha: "",
     competencia: "",
+    rap: "",
     ambiente: "",
     horaInicio: "",
     horaFin: "",
-    actividades: [""]
+    actividadesPlaneadas: "",
+    evidencia: "",
   });
-  const [actividadesExpanded, setActividadesExpanded] = useState(true);
 
-  const handleAddActivity = () => {
-    setFormData({
-      ...formData,
-      actividades: [...formData.actividades, ""]
-    });
-  };
-
-  const handleRemoveActivity = (index) => {
-    const newActividades = formData.actividades.filter((_, i) => i !== index);
-    setFormData({
-      ...formData,
-      actividades: newActividades.length > 0 ? newActividades : [""]
-    });
-  };
-
-  const handleActivityChange = (index, value) => {
-    const newActividades = [...formData.actividades];
-    newActividades[index] = value;
-    setFormData({
-      ...formData,
-      actividades: newActividades
-    });
-  };
+  // Mantener sincronizados ficha e instructor con lo que llega desde Gestión de Horarios
+  useEffect(() => {
+    if (isOpen) {
+      setFormData((prev) => ({
+        ...prev,
+        ficha: fichaCode || "",
+        instructor: instructorName || "",
+      }));
+    }
+  }, [isOpen, fichaCode, instructorName]);
 
   const handleDownload = async () => {
     // Validar campos requeridos
+    if (!formData.ficha.trim()) {
+      showAlert.warning("Campo requerido", "Debe tener una ficha seleccionada.");
+      return;
+    }
+
+    if (!formData.instructor.trim()) {
+      console.warn("Plan de trabajo sin instructor asociado explícito");
+    }
+
+    if (!formData.fecha) {
+      showAlert.warning("Campo requerido", "Debe ingresar la fecha del horario");
+      return;
+    }
     if (!formData.competencia.trim()) {
       showAlert.warning("Campo requerido", "Debe ingresar la competencia");
       return;
@@ -55,13 +80,35 @@ export default function AddScheduleModal({ isOpen, onClose }) {
       showAlert.warning("Campo requerido", "Debe ingresar la hora de finalización");
       return;
     }
-    const actividadesValidas = formData.actividades.filter(a => a.trim());
-    if (actividadesValidas.length === 0) {
-      showAlert.warning("Campo requerido", "Debe agregar al menos una actividad");
+    if (!formData.rap.trim()) {
+      showAlert.warning("Campo requerido", "Debe seleccionar el resultado de aprendizaje (RAP)");
+      return;
+    }
+    if (!formData.actividadesPlaneadas.trim()) {
+      showAlert.warning("Campo requerido", "Debe registrar las actividades planeadas");
+      return;
+    }
+    if (!formData.evidencia.trim()) {
+      showAlert.warning("Campo requerido", "Debe registrar la evidencia");
       return;
     }
 
-    const dataToSave = { ...formData, actividades: actividadesValidas };
+    if (formData.horaInicio && formData.horaFin && formData.horaFin <= formData.horaInicio) {
+      showAlert.warning("Horas inválidas", "La hora de fin debe ser mayor a la hora de inicio.");
+      return;
+    }
+
+    const actividadesArray = formData.actividadesPlaneadas
+      .split("\n")
+      .map((a) => a.trim())
+      .filter((a) => a);
+
+    const dataToSave = {
+      ...formData,
+      ficha: formData.ficha,
+      instructor: formData.instructor,
+      actividades: actividadesArray,
+    };
     
     try {
       const { ExportService } = await import("@/features/instructors/services/ExportService");
@@ -78,18 +125,21 @@ export default function AddScheduleModal({ isOpen, onClose }) {
 
   const handleCancel = () => {
     setFormData({
+      fecha: "",
       competencia: "",
+      rap: "",
       ambiente: "",
       horaInicio: "",
       horaFin: "",
-      actividades: [""]
+      actividadesPlaneadas: "",
+      evidencia: "",
     });
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} hideCloseButton>
-      <DialogContent hideCloseButton>
+      <DialogContent hideCloseButton className="max-w-5xl">
         <div className="w-full overflow-hidden flex flex-col">
           {/* Header */}
           <div className="pb-4 border-b dark:border-gray-700">
@@ -100,36 +150,104 @@ export default function AddScheduleModal({ isOpen, onClose }) {
 
           {/* Form */}
           <div className="mt-6 space-y-4 overflow-y-auto max-h-[70vh]">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Competencia
-            </label>
-            <input
-              type="text"
-              value={formData.competencia}
-              onChange={(e) => setFormData({ ...formData, competencia: e.target.value })}
-              placeholder="Ingrese la competencia"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
-            />
+          {/* Ficha e Instructor (bloqueados) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Ficha
+              </label>
+              <input
+                type="text"
+                value={formData.ficha || "Sin ficha seleccionada"}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Instructor
+              </label>
+              <input
+                type="text"
+                value={formData.instructor || "Instructor titular de la ficha"}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Ambiente de formación
-            </label>
-            <input
-              type="text"
-              value={formData.ambiente}
-              onChange={(e) => setFormData({ ...formData, ambiente: e.target.value })}
-              placeholder="Ingrese el ambiente"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Competencia *
+              </label>
+              <select
+                value={formData.competencia}
+                onChange={(e) => setFormData({ ...formData, competencia: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+              >
+                <option value="">Seleccione una competencia</option>
+                {competenciasMock.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                RAP *
+              </label>
+              <select
+                value={formData.rap}
+                onChange={(e) => setFormData({ ...formData, rap: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+              >
+                <option value="">Seleccione un RAP</option>
+                {rapMock.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Fecha *
+              </label>
+              <input
+                type="date"
+                value={formData.fecha}
+                onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Ambiente *
+              </label>
+              <select
+                value={formData.ambiente}
+                onChange={(e) => setFormData({ ...formData, ambiente: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+              >
+                <option value="">Seleccione un ambiente</option>
+                {ambientesMock.map((a) => (
+                  <option key={a} value={a}>
+                    {a}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Hora de inicio
+                Hora inicio *
               </label>
               <input
                 type="time"
@@ -140,7 +258,7 @@ export default function AddScheduleModal({ isOpen, onClose }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Hora de finalización
+                Hora fin *
               </label>
               <input
                 type="time"
@@ -151,65 +269,30 @@ export default function AddScheduleModal({ isOpen, onClose }) {
             </div>
           </div>
 
-          {/* Actividades - Sección desplegable */}
-          <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setActividadesExpanded(!actividadesExpanded)}
-              className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-            >
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Actividades ({formData.actividades.filter(a => a.trim()).length} agregadas)
-              </span>
-              <div className="flex items-center gap-2">
-                <span
-                  onClick={(e) => { e.stopPropagation(); handleAddActivity(); }}
-                  className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
-                >
-                  <Plus className="w-4 h-4" />
-                  Agregar
-                </span>
-                {actividadesExpanded ? (
-                  <ChevronUp className="w-5 h-5 text-gray-500" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-gray-500" />
-                )}
-              </div>
-            </button>
-            
-            {actividadesExpanded && (
-              <div className="p-3 space-y-2 bg-white dark:bg-gray-800">
-                {formData.actividades.map((actividad, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <span className="w-6 h-6 shrink-0 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-medium">
-                      {index + 1}
-                    </span>
-                    <input
-                      type="text"
-                      value={actividad}
-                      onChange={(e) => handleActivityChange(index, e.target.value)}
-                      placeholder={`Descripción de la actividad ${index + 1}`}
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
-                    />
-                    {formData.actividades.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveActivity(index)}
-                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                        title="Eliminar actividad"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-                {formData.actividades.length === 0 && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
-                    No hay actividades. Haga clic en "Agregar" para añadir una.
-                  </p>
-                )}
-              </div>
-            )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Actividades planeadas *
+            </label>
+            <textarea
+              rows={3}
+              value={formData.actividadesPlaneadas}
+              onChange={(e) => setFormData({ ...formData, actividadesPlaneadas: e.target.value })}
+              placeholder="Describa las actividades que se desarrollarán en la sesión"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg.focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-800 dark:text-white text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Evidencia *
+            </label>
+            <textarea
+              rows={3}
+              value={formData.evidencia}
+              onChange={(e) => setFormData({ ...formData, evidencia: e.target.value })}
+              placeholder="Describa la evidencia o producto esperado de las actividades"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-800 dark:text-white text-sm"
+            />
           </div>
         </div>
 

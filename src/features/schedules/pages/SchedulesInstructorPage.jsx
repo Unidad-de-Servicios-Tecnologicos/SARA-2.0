@@ -11,6 +11,7 @@ import {
 import SearchInstructor from "../components/SearchInstructor";
 import CalendarView from "../components/CalendarView";
 import RAPModal from "../components/RAPModal";
+import ScheduleDetailModal from "../components/ScheduleDetailModal";
 import { AddKeywordFichaModal, AddKeywordInstructorModal } from "../components/AddKeywordModal";
 import { AllInstructorCalendarsModal, AllFichaCalendarsModal } from "../components/AllCalendarsModal";
 import RegistrarFichaModal from "../components/RegistrarFichaModal";
@@ -30,6 +31,8 @@ export default function SchedulesInstructorPage() {
   const [showAllInstructorsModal, setShowAllInstructorsModal] = useState(false);
   const [showAllFichasModal, setShowAllFichasModal] = useState(false);
   const [showRegistrarFichaModal, setShowRegistrarFichaModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   // Datos de horas programadas (mock)
   const horasProgramadas = {
@@ -221,6 +224,10 @@ export default function SchedulesInstructorPage() {
         <CalendarView 
           title={`Horario de ${searchValue || "Instructor"}`}
           showViewSelector={true}
+          onEventClick={(event) => {
+            setSelectedEvent({ ...event, instructor: searchValue });
+            setShowDetailModal(true);
+          }}
         />
       )}
 
@@ -265,6 +272,12 @@ export default function SchedulesInstructorPage() {
         isOpen={showRegistrarFichaModal}
         onClose={() => setShowRegistrarFichaModal(false)}
         instructorName={searchValue}
+      />
+
+      <ScheduleDetailModal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        event={selectedEvent}
       />
     </div>
   );

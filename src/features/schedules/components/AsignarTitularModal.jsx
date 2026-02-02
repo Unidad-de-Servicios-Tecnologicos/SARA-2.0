@@ -1,71 +1,102 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
-import { ChevronDown, Search, UserCheck } from "lucide-react";
+import { UserCheck } from "lucide-react";
 import { showAlert } from "@/shared/notifications";
 
 // Lista de instructores disponibles (mock)
 const instructoresDisponibles = [
-  { id: 1, name: "CLAUDIA CAMPUZANO ESTRADA", cargo: "Instructor", especialidad: "Gestión Administrativa" },
-  { id: 2, name: "ADOLFO LEON LOPEZ GOMEZ", cargo: "Instructor", especialidad: "Contabilidad" },
-  { id: 3, name: "ALBEIRO OSPINA PENAGOS", cargo: "Instructor", especialidad: "Talento Humano" },
-  { id: 4, name: "MARIA FERNANDA RIOS", cargo: "Instructor", especialidad: "Emprendimiento" },
-  { id: 5, name: "CARLOS ANDRES MEJIA", cargo: "Instructor", especialidad: "Gestión Empresarial" },
-  { id: 6, name: "SANDRA MILENA TORRES", cargo: "Instructor", especialidad: "Logística" },
-  { id: 7, name: "JUAN PABLO GARCIA", cargo: "Instructor", especialidad: "Análisis y Desarrollo de Software" },
-  { id: 8, name: "LAURA VALENTINA DIAZ", cargo: "Instructor", especialidad: "Gestión Documental" },
+  "CLAUDIA CAMPUZANO ESTRADA",
+  "ADOLFO LEON LOPEZ GOMEZ",
+  "ALBEIRO OSPINA PENAGOS",
+  "MARIA FERNANDA RIOS",
+  "CARLOS ANDRES MEJIA",
+  "SANDRA MILENA TORRES",
+  "JUAN PABLO GARCIA",
+  "LAURA VALENTINA DIAZ",
 ];
 
 export default function AsignarTitularModal({ isOpen, onClose, fichaCode = "" }) {
-  const [search, setSearch] = useState("");
-  const [selectedInstructor, setSelectedInstructor] = useState(null);
+  const [ficha, setFicha] = useState(fichaCode || "");
+  const [instructor, setInstructor] = useState("");
+  const [fechaAsignacion, setFechaAsignacion] = useState("");
+  const [observacion, setObservacion] = useState("");
+  const asignacionesRef = useRef([]);
 
-  const filteredInstructors = instructoresDisponibles.filter(
-    (instructor) =>
-      instructor.name.toLowerCase().includes(search.toLowerCase()) ||
-      instructor.especialidad.toLowerCase().includes(search.toLowerCase())
-  );
+  // Mantener sincronizada la ficha mostrada con la que llega desde Gestión de Horarios
+  useEffect(() => {
+    if (isOpen) {
+      setFicha(fichaCode || "");
+    }
+  }, [isOpen, fichaCode]);
 
-  const handleSave = () => {
-    if (!selectedInstructor) {
-      showAlert.warning("Selección requerida", "Por favor seleccione un instructor para asignar como titular.");
+  const handleSave = async () => {
+    if (!ficha) {
+      showAlert.warning("Ficha requerida", "No se ha seleccionado una ficha.");
       return;
     }
 
-    const instructorToSave = { ...selectedInstructor };
-    const fichaToSave = fichaCode;
-    
-    // Cerrar el dialog primero
-    onClose();
-    setSelectedInstructor(null);
-    setSearch("");
+    if (!instructor) {
+      showAlert.warning("Instructor requerido", "Debe seleccionar un instructor.");
+      return;
+    }
 
-    // Mostrar confirmación después de cerrar el dialog
+    if (!fechaAsignacion) {
+      showAlert.warning("Fecha requerida", "Debe registrar la fecha de asignación.");
+      return;
+    }
+
+    const yaTieneTitular = asignacionesRef.current.includes(ficha);
+    if (yaTieneTitular) {
+      showAlert.warning(
+        "Titular existente",
+        `La ficha ${fichaCode} ya tiene un instructor titular asignado.`
+      );
+      return;
+    }
+
+    const dataToSave = {
+      ficha,
+      instructor,
+      rol: "Titular",
+      fechaAsignacion,
+      observacion,
+    };
+
+    onClose();
+
     setTimeout(async () => {
       const confirmed = await showAlert.confirm(
         "Confirmar asignación",
-        `¿Desea asignar a ${instructorToSave.name} como titular de la ficha ${fichaToSave || "seleccionada"}?`,
+        `¿Desea asignar a ${instructor} como titular de la ficha ${ficha}?`,
         "Asignar"
       );
 
       if (confirmed) {
-        console.log("Asignando titular:", instructorToSave, "a ficha:", fichaToSave);
+        asignacionesRef.current.push(ficha);
+        console.log("Asignando titular:", dataToSave);
         await showAlert.success(
           "¡Titular asignado!",
-          `${instructorToSave.name} ha sido asignado como titular correctamente.`
+          `${instructor} ha sido asignado como titular correctamente.`
         );
       }
     }, 100);
+
+    setFicha(fichaCode || "");
+    setInstructor("");
+    setFechaAsignacion("");
+    setObservacion("");
   };
 
   const handleCancel = () => {
-    setSelectedInstructor(null);
-    setSearch("");
+    setInstructor("");
+    setFechaAsignacion("");
+    setObservacion("");
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel} hideCloseButton>
-      <DialogContent hideCloseButton>
+      <DialogContent hideCloseButton className="max-w-md">
         <div className="w-full overflow-hidden flex flex-col">
           {/* Header */}
           <div className="flex items-center gap-3 pb-4 border-b dark:border-gray-700">
@@ -74,73 +105,71 @@ export default function AsignarTitularModal({ isOpen, onClose, fichaCode = "" })
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Asignar Instructor Titular
+                Asignar instructor titular
               </h2>
-              {fichaCode && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Ficha: {fichaCode}
-                </p>
-              )}
             </div>
           </div>
 
-          {/* Search */}
-          <div className="mt-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          {/* Formulario */}
+          <div className="mt-6 space-y-4 overflow-y-auto max-h-[70vh]">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Ficha
+              </label>
               <input
                 type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar instructor por nombre o especialidad..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                value={ficha || "Sin ficha seleccionada"}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Instructor *
+              </label>
+              <select
+                value={instructor}
+                onChange={(e) => setInstructor(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+              >
+                <option value="">Seleccione un instructor</option>
+                {instructoresDisponibles.map((inst) => (
+                  <option key={inst} value={inst}>
+                    {inst}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Rol oculto (Titular) */}
+            <input type="hidden" value="Titular" readOnly />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Fecha de asignación *
+              </label>
+              <input
+                type="date"
+                value={fechaAsignacion}
+                onChange={(e) => setFechaAsignacion(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Observación
+              </label>
+              <textarea
+                rows={3}
+                value={observacion}
+                onChange={(e) => setObservacion(e.target.value)}
+                placeholder="Observaciones adicionales sobre la asignación"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-white text-sm"
               />
             </div>
           </div>
-
-          {/* Lista de instructores */}
-          <div className="mt-4 max-h-64 overflow-auto border border-gray-200 dark:border-gray-700 rounded-lg">
-            {filteredInstructors.length === 0 ? (
-              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                No se encontraron instructores
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredInstructors.map((instructor) => (
-                  <button
-                    key={instructor.id}
-                    type="button"
-                    onClick={() => setSelectedInstructor(instructor)}
-                    className={`w-full p-4 text-left transition-colors ${
-                      selectedInstructor?.id === instructor.id
-                        ? "bg-teal-50 dark:bg-teal-900/30 border-l-4 border-teal-500"
-                        : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                    }`}
-                  >
-                    <p className={`font-medium ${
-                      selectedInstructor?.id === instructor.id
-                        ? "text-teal-700 dark:text-teal-300"
-                        : "text-gray-900 dark:text-white"
-                    }`}>
-                      {instructor.name}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {instructor.cargo} • {instructor.especialidad}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Instructor seleccionado */}
-          {selectedInstructor && (
-            <div className="mt-4 p-3 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg">
-              <p className="text-sm text-teal-700 dark:text-teal-300">
-                <span className="font-medium">Seleccionado:</span> {selectedInstructor.name}
-              </p>
-            </div>
-          )}
 
           {/* Footer */}
           <div className="flex justify-end gap-3 pt-6 mt-6 border-t dark:border-gray-700">
@@ -152,11 +181,10 @@ export default function AsignarTitularModal({ isOpen, onClose, fichaCode = "" })
             </button>
             <button
               onClick={handleSave}
-              disabled={!selectedInstructor}
-              className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium flex items-center gap-2"
             >
               <UserCheck className="w-4 h-4" />
-              Asignar Titular
+              Asignar
             </button>
           </div>
         </div>
