@@ -68,8 +68,8 @@ export const mockInstructores = [
       porcentajeOcupacion: 80,
     },
     fichasAsignadas: [
-      { id: 1, numero: "2889927", programa: "Análisis y Desarrollo de Software", rol: "titular" },
-      { id: 3, numero: "2891234", programa: "Análisis y Desarrollo de Software", rol: "apoyo" },
+      { id: 1, numero: "2889927", programa: "Análisis y Desarrollo de Software", rol: "titular", jornada: "Matutina", horasAsignadas: 8 },
+      { id: 3, numero: "2891234", programa: "Análisis y Desarrollo de Software", rol: "apoyo", jornada: "Vespertina", horasAsignadas: 6 },
     ],
     competencias: [
       "Análisis de requerimientos",
@@ -101,7 +101,7 @@ export const mockInstructores = [
       porcentajeOcupacion: 70,
     },
     fichasAsignadas: [
-      { id: 2, numero: "2890543", programa: "Gestión Empresarial", rol: "titular" },
+      { id: 2, numero: "2890543", programa: "Gestión Empresarial", rol: "titular", jornada: "Matutina", horasAsignadas: 8 },
     ],
     competencias: [
       "Comunicación asertiva",
@@ -132,8 +132,8 @@ export const mockInstructores = [
       porcentajeOcupacion: 89,
     },
     fichasAsignadas: [
-      { id: 4, numero: "2892001", programa: "Gestión de Redes de Datos", rol: "titular" },
-      { id: 5, numero: "2892345", programa: "Gestión de Redes de Datos", rol: "titular" },
+      { id: 4, numero: "2892001", programa: "Gestión de Redes de Datos", rol: "titular", jornada: "Vespertina", horasAsignadas: 8 },
+      { id: 5, numero: "2892345", programa: "Gestión de Redes de Datos", rol: "titular", jornada: "Nocturna", horasAsignadas: 8 },
     ],
     competencias: [
       "Redes de datos",
@@ -164,7 +164,7 @@ export const mockInstructores = [
       porcentajeOcupacion: 60,
     },
     fichasAsignadas: [
-      { id: 1, numero: "2889927", programa: "Análisis y Desarrollo de Software", rol: "lider" },
+      { id: 1, numero: "2889927", programa: "Análisis y Desarrollo de Software", rol: "lider", jornada: "Matutina", horasAsignadas: 10 },
     ],
     competencias: [
       "Gestión de proyectos",
@@ -195,7 +195,7 @@ export const mockInstructores = [
       porcentajeOcupacion: 100,
     },
     fichasAsignadas: [
-      { id: 6, numero: "2893456", programa: "Mantenimiento Industrial", rol: "titular" },
+      { id: 6, numero: "2893456", programa: "Mantenimiento Industrial", rol: "titular", jornada: "Vespertina", horasAsignadas: 12 },
     ],
     competencias: [
       "Automatización industrial",
@@ -226,8 +226,8 @@ export const mockInstructores = [
       porcentajeOcupacion: 50,
     },
     fichasAsignadas: [
-      { id: 2, numero: "2890543", programa: "Gestión Empresarial", rol: "apoyo" },
-      { id: 7, numero: "2894567", programa: "Contabilidad y Finanzas", rol: "titular" },
+      { id: 2, numero: "2890543", programa: "Gestión Empresarial", rol: "apoyo", jornada: "Matutina", horasAsignadas: 6 },
+      { id: 7, numero: "2894567", programa: "Contabilidad y Finanzas", rol: "titular", jornada: "Nocturna", horasAsignadas: 8 },
     ],
     competencias: [
       "Inglés técnico",
@@ -337,36 +337,219 @@ export const mockSedes = [
   { id: 4, nombre: "Centro de Servicios de Salud" },
 ];
 
-// Actividades de instructores
+// Tipos de actividades
+export const mockTiposActividades = [
+  { id: "clase", label: "Clase" },
+  { id: "practica", label: "Práctica" },
+  { id: "proyecto", label: "Proyecto" },
+  { id: "evaluacion", label: "Evaluación" },
+  { id: "taller", label: "Taller" },
+  { id: "consulta", label: "Consulta" },
+];
+
+// Actividades estructuradas de instructores con fecha, ficha, competencia, RAP, tipo, horas
 export const mockActividadesInstructor = {
   1: [ // Juan Carlos Méndez
-    { id: 1, titulo: "Programación en Java", descripcion: "Desarrollo de aplicaciones backend", ficha: "2889927", horasSemana: 12, estado: "en curso", fecha: "2024-09-15" },
-    { id: 2, titulo: "Bases de Datos SQL", descripcion: "Diseño e implementación de bases de datos relacionales", ficha: "2891234", horasSemana: 8, estado: "en curso", fecha: "2024-10-01" },
-    { id: 3, titulo: "React avanzado", descripcion: "Desarrollo frontend con React y TypeScript", ficha: "2889927", horasSemana: 10, estado: "completado", fecha: "2024-08-30" },
+    { 
+      id: 1, 
+      fecha: "2025-01-15", 
+      ficha: "2889927", 
+      programa: "Análisis y Desarrollo de Software",
+      competencia: "Desarrollar soluciones de software", 
+      rap: "RAP 1 - Análisis de requerimientos",
+      tipo: "clase",
+      horas: 2,
+      descripcion: "Introducción a análisis de requerimientos"
+    },
+    { 
+      id: 2, 
+      fecha: "2025-01-16", 
+      ficha: "2891234", 
+      programa: "Análisis y Desarrollo de Software",
+      competencia: "Diseñar bases de datos", 
+      rap: "RAP 2 - Diseño de BD",
+      tipo: "practica",
+      horas: 3,
+      descripcion: "Práctica de diseño en MySQL"
+    },
+    { 
+      id: 3, 
+      fecha: "2025-01-17", 
+      ficha: "2889927", 
+      programa: "Análisis y Desarrollo de Software",
+      competencia: "Desarrollar soluciones de software", 
+      rap: "RAP 3 - Desarrollo en Java",
+      tipo: "proyecto",
+      horas: 4,
+      descripcion: "Desarrollo de aplicación backend"
+    },
+    { 
+      id: 4, 
+      fecha: "2025-01-20", 
+      ficha: "2889927", 
+      programa: "Análisis y Desarrollo de Software",
+      competencia: "Desarrollar soluciones de software", 
+      rap: "RAP 1 - Análisis de requerimientos",
+      tipo: "evaluacion",
+      horas: 1,
+      descripcion: "Quiz de análisis de requerimientos"
+    },
   ],
   2: [ // María López
-    { id: 4, titulo: "Emprendimiento empresarial", descripcion: "Formación en plan de negocios", ficha: "2890543", horasSemana: 6, estado: "en curso", fecha: "2024-09-10" },
-    { id: 5, titulo: "Ética profesional", descripcion: "Valores y ética en el trabajo", ficha: "2890543", horasSemana: 4, estado: "en curso", fecha: "2024-11-05" },
+    { 
+      id: 5, 
+      fecha: "2025-01-14", 
+      ficha: "2890543", 
+      programa: "Gestión Empresarial",
+      competencia: "Emprendimiento e innovación", 
+      rap: "RAP 1 - Plan de negocio",
+      tipo: "taller",
+      horas: 2,
+      descripcion: "Taller de formulación de planes de negocio"
+    },
+    { 
+      id: 6, 
+      fecha: "2025-01-18", 
+      ficha: "2890543", 
+      programa: "Gestión Empresarial",
+      competencia: "Ética y responsabilidad social", 
+      rap: "RAP 2 - Ética profesional",
+      tipo: "clase",
+      horas: 1.5,
+      descripcion: "Valores y ética en el trabajo"
+    },
   ],
   3: [ // Pedro Gómez
-    { id: 6, titulo: "Configuración de Redes", descripcion: "Configuración de routers y switches", ficha: "2892001", horasSemana: 14, estado: "en curso", fecha: "2024-09-20" },
-    { id: 7, titulo: "Seguridad en Redes", descripcion: "Implementación de firewalls y VPN", ficha: "2892345", horasSemana: 10, estado: "en curso", fecha: "2024-10-15" },
-    { id: 8, titulo: "Soporte Técnico", descripcion: "Soporte y mantenimiento de infraestructura", ficha: "2892001", horasSemana: 12, estado: "completado", fecha: "2024-07-30" },
+    { 
+      id: 7, 
+      fecha: "2025-01-15", 
+      ficha: "2892001", 
+      programa: "Gestión de Redes de Datos",
+      competencia: "Administrar redes de datos", 
+      rap: "RAP 1 - Configuración de routers",
+      tipo: "practica",
+      horas: 3,
+      descripcion: "Configuración de OSPF"
+    },
+    { 
+      id: 8, 
+      fecha: "2025-01-17", 
+      ficha: "2892345", 
+      programa: "Gestión de Redes de Datos",
+      competencia: "Implementar seguridad en redes", 
+      rap: "RAP 2 - Firewalls y VPN",
+      tipo: "taller",
+      horas: 2.5,
+      descripcion: "Implementación de firewalls"
+    },
+    { 
+      id: 9, 
+      fecha: "2025-01-19", 
+      ficha: "2892001", 
+      programa: "Gestión de Redes de Datos",
+      competencia: "Administrar redes de datos", 
+      rap: "RAP 1 - Configuración de routers",
+      tipo: "evaluacion",
+      horas: 1,
+      descripcion: "Examen de configuración de redes"
+    },
   ],
   4: [ // Luz Marina Torres
-    { id: 9, titulo: "Gestión de Proyectos", descripcion: "Dirección y coordinación de proyectos de TI", ficha: "2889927", horasSemana: 8, estado: "en curso", fecha: "2024-09-01" },
+    { 
+      id: 10, 
+      fecha: "2025-01-16", 
+      ficha: "2889927", 
+      programa: "Análisis y Desarrollo de Software",
+      competencia: "Gestionar proyectos de software", 
+      rap: "RAP 1 - Planificación de proyectos",
+      tipo: "clase",
+      horas: 2,
+      descripcion: "Introducción a metodologías ágiles"
+    },
   ],
   5: [ // Carlos Alberto Ruiz
-    { id: 10, titulo: "Mantenimiento Preventivo", descripcion: "Planificación y ejecución de mantenimiento", ficha: "2893456", horasSemana: 16, estado: "en curso", fecha: "2024-09-05" },
+    { 
+      id: 11, 
+      fecha: "2025-01-15", 
+      ficha: "2893456", 
+      programa: "Mantenimiento de Equipos",
+      competencia: "Realizar mantenimiento preventivo", 
+      rap: "RAP 1 - Planificación de mantenimiento",
+      tipo: "practica",
+      horas: 4,
+      descripcion: "Práctica de mantenimiento de equipos"
+    },
+    { 
+      id: 12, 
+      fecha: "2025-01-18", 
+      ficha: "2893456", 
+      programa: "Mantenimiento de Equipos",
+      competencia: "Realizar mantenimiento preventivo", 
+      rap: "RAP 2 - Ejecución de mantenimiento",
+      tipo: "proyecto",
+      horas: 3,
+      descripcion: "Proyecto de mantenimiento integral"
+    },
   ],
   6: [ // Sandra Patricia Moreno
-    { id: 11, titulo: "Inglés de Negocios", descripcion: "Comunicación empresarial en inglés", ficha: "2890543", horasSemana: 6, estado: "en curso", fecha: "2024-10-10" },
-    { id: 12, titulo: "Cultura Física", descripcion: "Ejercicio y bienestar laboral", ficha: "2894567", horasSemana: 4, estado: "en curso", fecha: "2024-11-01" },
+    { 
+      id: 13, 
+      fecha: "2025-01-14", 
+      ficha: "2890543", 
+      programa: "Gestión Empresarial",
+      competencia: "Comunicación empresarial", 
+      rap: "RAP 1 - Comunicación en inglés",
+      tipo: "clase",
+      horas: 2,
+      descripcion: "Inglés de negocios nivel intermediate"
+    },
+    { 
+      id: 14, 
+      fecha: "2025-01-16", 
+      ficha: "2894567", 
+      programa: "Educación Física",
+      competencia: "Promover bienestar físico", 
+      rap: "RAP 1 - Ejercicio y salud",
+      tipo: "practica",
+      horas: 1.5,
+      descripcion: "Sesión de entrenamiento funcional"
+    },
   ],
-  7: [ // Andrés Felipe Martínez (sin actividades activas por incapacidad)
+  7: [ // Andrés Felipe Martínez (sin actividades por incapacidad)
   ],
   8: [ // Diana Carolina Hernández
-    { id: 13, titulo: "Atención al Paciente", descripcion: "Comunicación efectiva con pacientes", ficha: "2895678", horasSemana: 10, estado: "en curso", fecha: "2024-09-15" },
-    { id: 14, titulo: "Primeros Auxilios", descripcion: "Técnicas de emergencia médica", ficha: "2895678", horasSemana: 8, estado: "en curso", fecha: "2024-10-20" },
+    { 
+      id: 15, 
+      fecha: "2025-01-15", 
+      ficha: "2895678", 
+      programa: "Salud Ocupacional",
+      competencia: "Atención al paciente", 
+      rap: "RAP 1 - Comunicación efectiva",
+      tipo: "clase",
+      horas: 2,
+      descripcion: "Comunicación con pacientes"
+    },
+    { 
+      id: 16, 
+      fecha: "2025-01-17", 
+      ficha: "2895678", 
+      programa: "Salud Ocupacional",
+      competencia: "Atención en emergencias", 
+      rap: "RAP 2 - Primeros auxilios",
+      tipo: "taller",
+      horas: 3,
+      descripcion: "Taller de primeros auxilios avanzados"
+    },
+    { 
+      id: 17, 
+      fecha: "2025-01-19", 
+      ficha: "2895678", 
+      programa: "Salud Ocupacional",
+      competencia: "Atención al paciente", 
+      rap: "RAP 1 - Comunicación efectiva",
+      tipo: "evaluacion",
+      horas: 1,
+      descripcion: "Evaluación de protocolos"
+    },
   ],
 };

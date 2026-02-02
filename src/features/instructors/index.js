@@ -7,6 +7,8 @@ export { default as InstructorTable } from "./components/InstructorTable";
 export { default as CreateInstructorModal } from "./components/CreateInstructorModal";
 export { default as EditInstructorModal } from "./components/EditInstructorModal";
 export { default as InstructorDetailModal } from "./components/InstructorDetailModal";
+export { default as InstructorSidePanel } from "./components/InstructorSidePanel";
+export { default as InstructorFichasModal } from "./components/InstructorFichasModal";
 export { default as InstructorActivitiesModal } from "./components/InstructorActivitiesModal";
 
 // Hooks

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import InstructorTable from "../components/InstructorTable";
-import InstructorDetailModal from "../components/InstructorDetailModal";
+import InstructorSidePanel from "../components/InstructorSidePanel";
 import InstructorActivitiesModal from "../components/InstructorActivitiesModal";
 import InstructorFichasModal from "../components/InstructorFichasModal";
+import InstructorSchedulePreview from "../components/InstructorSchedulePreview";
 import EditInstructorModal from "../components/EditInstructorModal";
 import {
   useInstructores,
@@ -12,17 +13,21 @@ import {
 import { showToast, showAlert } from "@/shared/notifications";
 import { downloadReport } from "@/utils/downloadReports";
 import { Button } from "../../../components/ui/button";
-import { Plus, Download, FileText } from "lucide-react";
-import CreateInstructorModal from '../components/CreateInstructorModal';
+import CreateInstructorModal from "../components/CreateInstructorModal";
 
 export default function InstructorsListPage() {
-  // Estados locales
+  // Estados para panel lateral
+  const [showSidePanel, setShowSidePanel] = useState(false);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // Estados para modales
   const [showActivitiesModal, setShowActivitiesModal] = useState(false);
   const [activitiesInstructor, setActivitiesInstructor] = useState(null);
   const [showFichasModal, setShowFichasModal] = useState(false);
   const [fichasInstructor, setFichasInstructor] = useState(null);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleContext, setScheduleContext] = useState({ instructor: null, ficha: null });
+
   // Estados para edición
   const [showEditModal, setShowEditModal] = useState(false);
   const [editInstructor, setEditInstructor] = useState(null);
@@ -32,16 +37,15 @@ export default function InstructorsListPage() {
   const { cambiarEstado } = useInstructoresMutations();
   const catalogos = useInstructoresCatalogos();
 
-  // Función para ver detalle de instructor
+  // Función para abrir panel lateral
   const handleViewDetail = (instructor) => {
-    console.log('Abriendo modal de detalle para instructor:', instructor.nombre);
     setSelectedInstructor(instructor);
-    setShowDetailModal(true);
+    setShowSidePanel(true);
   };
 
-  // Función para cerrar modal de detalle
-  const handleCloseDetail = () => {
-    setShowDetailModal(false);
+  // Función para cerrar panel lateral
+  const handleCloseSidePanel = () => {
+    setShowSidePanel(false);
     setSelectedInstructor(null);
   };
 
@@ -104,32 +108,6 @@ export default function InstructorsListPage() {
 
   return (
     <div className="relative space-y-6">
-      {/* Botones de acción */}
-      <div className="flex gap-2 justify-between">
-        <div className="flex gap-1">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleExportData('excel')}
-            className="flex items-center gap-2"
-            title="Descargar en Excel"
-          >
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Excel</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleExportData('pdf')}
-            className="flex items-center gap-2"
-            title="Descargar en PDF"
-          >
-            <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">PDF</span>
-          </Button>
-        </div>
-      </div>
-
       {/* Tabla de instructores */}
       <InstructorTable
         instructores={instructores}
@@ -143,6 +121,7 @@ export default function InstructorsListPage() {
           setActivitiesInstructor(instructor);
           setShowActivitiesModal(true);
         }}
+        onExportExcel={() => handleExportData("excel")}
         onToggleEstado={async (instructorId, nuevoEstado) => {
           try {
             await cambiarEstado(instructorId, nuevoEstado ? "activo" : "inactivo");
@@ -154,11 +133,30 @@ export default function InstructorsListPage() {
         }}
       />
 
+      {/* Panel lateral de información */}
+      <InstructorSidePanel
+        isOpen={showSidePanel}
+        onClose={handleCloseSidePanel}
+        instructor={selectedInstructor}
+        onViewFichas={() => {
+          setFichasInstructor(selectedInstructor);
+          setShowFichasModal(true);
+        }}
+        onViewActivities={() => {
+          setActivitiesInstructor(selectedInstructor);
+          setShowActivitiesModal(true);
+        }}
+      />
+
       {/* Modal fichas */}
       <InstructorFichasModal
         isOpen={showFichasModal}
         onClose={() => setShowFichasModal(false)}
         instructor={fichasInstructor}
+        onViewSchedule={(ficha) => {
+          setScheduleContext({ instructor: fichasInstructor, ficha });
+          setShowScheduleModal(true);
+        }}
       />
 
       {/* Modal actividades */}
@@ -168,20 +166,13 @@ export default function InstructorsListPage() {
         instructor={activitiesInstructor}
       />
 
-      {/* Modal de detalle */}
-      {showDetailModal && selectedInstructor && (
-        <InstructorDetailModal
-          isOpen={showDetailModal}
-          onClose={handleCloseDetail}
-          instructor={selectedInstructor}
-          onRefresh={refreshAll}
-          onEdit={(instructor) => {
-            setShowDetailModal(false);
-            setEditInstructor(instructor);
-            setShowEditModal(true);
-          }}
-        />
-      )}
+      {/* Modal de horario de ficha */}
+      <InstructorSchedulePreview
+        isOpen={showScheduleModal}
+        onClose={() => setShowScheduleModal(false)}
+        instructor={scheduleContext.instructor}
+        ficha={scheduleContext.ficha}
+      />
 
       {/* Modal de edición */}
       {showEditModal && editInstructor && (

@@ -14,8 +14,6 @@ import {
 } from "lucide-react";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/button";
-import { ExportService } from "../services/ExportService";
-import { showToast } from "@/shared/notifications";
 
 // Helper para obtener config de contrato/vinculación
 const getContratoConfig = (tipo) => {
@@ -144,6 +142,7 @@ export default function InstructorTable({
   onView,
   onFichas,
   onActividad,
+   onExportExcel,
   onToggleEstado,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -166,55 +165,6 @@ export default function InstructorTable({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedData = filteredInstructores.slice(startIndex, endIndex);
-
-  const handleDownload = async () => {
-    try {
-      // Función para escapar valores CSV correctamente
-      const formatValue = (v) => {
-        const val = v.toString().trim();
-        return val.includes(';') || val.includes('"') ? `"${val.replace(/"/g, '""')}"` : val;
-      };
-
-      // Crear CSV personalizado para fichas asignadas
-      const headers = ['Instructor', 'Documento', 'Ficha', 'Programa', 'Rol'];
-      const rows = [headers];
-
-      filteredInstructores.forEach(inst => {
-        (inst.fichasAsignadas || []).forEach(ficha => {
-          rows.push([
-            formatValue(`${inst.nombre} ${inst.apellidos}`),
-            formatValue(inst.documento),
-            formatValue(ficha.numero),
-            formatValue(ficha.programa),
-            formatValue(ficha.rol)
-          ]);
-        });
-      });
-
-      // Convertir array de filas a CSV con punto y coma como separador (estándar Excel en español)
-      const csv = rows.map(row => row.join(';')).join('\r\n');
-      
-      // Agregar BOM para UTF-8 (necesario para Excel interprete acentos)
-      const BOM = '\uFEFF';
-      const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      
-      link.setAttribute('href', url);
-      link.setAttribute('download', `fichas_asignadas_${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      showToast.success("Archivo de fichas asignadas descargado correctamente");
-    } catch (error) {
-      showToast.error("Error al descargar el archivo");
-      console.error("Error:", error);
-    }
-  };
 
   // Loading skeleton
   if (loading) {
@@ -280,9 +230,14 @@ export default function InstructorTable({
               className="w-full sm:w-64"
             />
           </div>
-          <Button onClick={handleDownload} variant="outline" size="sm">
+          <Button
+            onClick={() => onExportExcel?.()}
+            variant="outline"
+            size="sm"
+            title="Descargar en Excel"
+          >
             <Download className="w-4 h-4 mr-2" />
-            Descargar Fichas Asignadas
+            Excel
           </Button>
         </div>
       </div>
