@@ -4,13 +4,12 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
 import { ROLES, ROLE_METADATA } from "@/config/permissions";
-import { showToast, showAlert } from '@/shared/notifications';
+import { showAlert } from '@/shared/notifications';
 import ForgotPassword from "./ForgotPassword";
 
 export default function LoginForm() {
   const login = useAuthStore((s) => s.login);
   const loading = useAuthStore((s) => s.loading);
-  const error = useAuthStore((s) => s.error);
 
   const [form, setForm] = useState({ username: "", password: "", role: "ADMINISTRADOR" });
   const [showPassword, setShowPassword] = useState(false);
@@ -112,14 +111,7 @@ export default function LoginForm() {
       </div>
 
       {/* ERROR */}
-      {error && (
-        <>
-          {showToast.error(error)}
-          <p className="text-red-600 text-sm font-medium">
-            {error}
-          </p>
-        </>
-      )}
+      {/* Error manejado por el store mediante toast automático */}
 
       {/* BOTÓN */}
       <Button

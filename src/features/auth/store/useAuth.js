@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { authService } from "../services/authService";
 import { usePermissionStore } from "./usePermissionStore";
+import { showToast } from "@/shared/notifications";
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -38,7 +39,9 @@ export const useAuthStore = create((set, get) => ({
     usePermissionStore.getState().initPermissions(user.role);
 
   } catch {
-    set({ error: "Credenciales incorrectas", loading: false });
+    const errorMsg = "Credenciales incorrectas";
+    showToast.error(errorMsg);
+    set({ error: null, loading: false });
   }
 },
 

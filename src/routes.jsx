@@ -13,6 +13,7 @@ import LearnerDetailPage from "@/features/learners/pages/LearnerDetailPage"
 import RendimientoPage from "@/features/learners/pages/RendimientoPage"
 import RecordsPracticesPage from "@/features/practices/pages/RecordsPracticesPage"
 import DocumentsPage from "@/features/documents/pages/DocumentsPage"
+import EnvironmentQRPage from "@/features/environment-reservations/pages/EnvironmentQRPage"
 
 export const router = createBrowserRouter([
   {
@@ -122,6 +123,10 @@ export const router = createBrowserRouter([
   {
     path: "/practices/ficha/:fichaId",
     element: <RecordsPracticesPage />,
+  },
+  {
+    path: "/qr/ambiente/:id",
+    element: <EnvironmentQRPage />,
   },
   {
     path: "*",
