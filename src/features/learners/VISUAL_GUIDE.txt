@@ -1,0 +1,314 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║         🎓 PANEL LATERAL GESTIÓN DE APRENDICES - VISUAL GUIDE              ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                         COMPARATIVA: ANTES vs DESPUÉS                       │
+└────────────────────────────────────────────────────────────────────────────┘
+
+ANTES (Modal Flotante - LearnerDetailModal)
+═══════════════════════════════════════════════════════════════════════════════
+
+         ┌────────────────────────────────┐
+         │     MODAL CENTRADO (máx 4xl)   │
+         │  ✕ Edit ✕ Export    ✕ Cerrar  │
+         ├────────────────────────────────┤
+         │ ENCABEZADO                     │
+         │ [5 TABS]                       │
+         │  Información│Fichas│Prácticas  │
+         │  Seguimiento│Historial        │
+         ├────────────────────────────────┤
+         │                                │
+         │  Información del tab actual    │
+         │  (contenido muy extenso)       │
+         │                                │
+         └────────────────────────────────┘
+
+❌ Ocupa mucho espacio central
+❌ 5 tabs para navegar información
+❌ Modal flotante distrae
+
+
+DESPUÉS (Panel Lateral - LearnerSidePanel)
+═════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────┬──────────────────────┐
+│   TABLA VISIBLE     │ PANEL LATERAL  │ X    │ 
+│   DE APRENDICES     │────────────────────┤
+│                     │ [Avatar] Juan P │✓   │
+│  ID  │ Nombre       │ En Formación        │
+│  ─── │ ───────      │ Ficha: 3014407      │
+│  001 │ Juan López   │ Programa: ADSO      │
+│  002 │ María García │────────────────────┤
+│  003 │ Carlos Pérez │ 👤 DATOS PERSONALES│
+│  004 │ Ana Martín   │ Documento: 123456  │
+│  005 │ Luis Gómez   │ Correo: juan@sena  │
+│      │              │ Teléfono: 301      │
+│  ┌──┐│              │ Jornada: Matutina  │
+│  │▼ ││              │────────────────────┤
+│  └──┘│              │ 📚 DATOS ACADÉMICOS│
+│      │              │ Inicio: 15/01/2024 │
+│      │              │ Fin: 15/06/2025    │
+│      │              │ Trimestre: 3       │
+│      │              │ Instructor: Ing.M. │
+│      │              │ Centro: Bogotá     │
+│      │              │────────────────────┤
+│      │              │ 🎖️  ESTADO FORMACIÓN│
+│      │              │ Progreso: ███░░░░░ 65%
+│      │              │ RAPS: [45A] [12P]  │
+│      │              │ Asistencia: █████░ 85%
+│      │              │ ⚠️  Alertas: 2     │
+│      │              │────────────────────┤
+│      │              │ 💼 PRÁCTICA        │
+│      │              │ Empresa: Tech SAS  │
+│      │              │ Estado: Activa     │
+│      │              │────────────────────┤
+│      │              │ 📝 OBSERVACIONES   │
+│      │              │ [Ver últimas 3]    │
+│      │              │════════════════════│
+│      │              │ [Ver RAPS]         │
+│      │              │ [Ver Horario]      │
+│      │              │ [Registrar Obs.]   │
+│      │              │ [Ver Documentos]   │
+│      │              │────────────────────┘
+
+✅ Tabla visible al lado
+✅ Información organizada en secciones
+✅ Sin necesidad de tabs
+✅ Acciones rápidas abajo
+✅ Scroll smooth para más contenido
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                         ESTRUCTURA DEL PANEL LATERAL                        │
+└────────────────────────────────────────────────────────────────────────────┘
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ ENCABEZADO (Sticky) - SIEMPRE VISIBLE                ┃ ↑
+┃────────────────────────────────────────────────────────┃ │
+┃ [Avatar] Nombre Completo                             ┃ │
+┃         Estado: 🔵 En Formación                      ┃ │ 80px
+┃         Ficha: 3014407  |  Programa: ADSO            ┃ │
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫ ↓
+┃                                                       ┃
+┃ SECCIÓN 1: 👤 DATOS PERSONALES                      ┃
+┃ ────────────────────────────────────                 ┃
+┃ • Documento: 1234567890                              ┃
+┃ • Correo: juan@sena.edu.co                           ┃
+┃ • Teléfono: 301-5551234                              ┃
+┃ • Jornada: Matutina                                  ┃
+┃ • Modalidad: Presencial                              ┃
+┃                                                       ┃
+┃ SECCIÓN 2: 📚 DATOS ACADÉMICOS                       ┃
+┃ ────────────────────────────────                     ┃
+┃ • Inicio: 15/01/2024                                 ┃
+┃ • Fin estimado: 15/06/2025                           ┃
+┃ • Trimestre actual: Trimestre 3                      ┃
+┃ • Instructor líder: Ing. María García                ┃
+┃ • Centro de formación: Centro Bogotá                 ┃
+┃                                                       ┃
+┃ SECCIÓN 3: 🎖️  ESTADO DE FORMACIÓN                   ┃ Scrollable
+┃ ────────────────────────────────                     ┃
+┃ • Progreso del programa: ███████░░░░░ 65%            ┃
+┃                                                       ┃
+┃ • RAPS:  [45 Aprobados] [12 Pendientes] [57 Total]  ┃
+┃                                                       ┃
+┃ • Asistencia: ████████░░░░░░░░░░░ 85%                ┃
+┃                                                       ┃
+┃ • Alertas:                                           ┃
+┃   ⚠️  Inasistencia el 15/01                          ┃
+┃   ⚠️  Bajo rendimiento en RAP-05                     ┃
+┃                                                       ┃
+┃ SECCIÓN 4: 💼 PRÁCTICA / EMPRESA                     ┃
+┃ ────────────────────────────────                     ┃
+┃ • Empresa: Tech Solutions SAS                        ┃
+┃ • Tipo: Empresarial                                  ┃
+┃ • Estado: 🟢 Activa                                  ┃
+┃ • Inicio: 01/06/2024                                 ┃
+┃ • Ver prácticas (2)                                  ┃
+┃                                                       ┃
+┃ SECCIÓN 5: 📝 OBSERVACIONES                          ┃
+┃ ────────────────────────────────                     ┃
+┃ [Observación 1]                                      ┃
+┃ Progreso académico - 20/01/2024                      ┃
+┃ "Aprendiz muestra buen desempeño en módulos"         ┃
+┃ Autor: Ing. María García                             ┃
+┃                                                       ┃
+┃ [Observación 2]                                      ┃
+┃ Asistencia - 18/01/2024                              ┃
+┃ "Faltó sin justificación a 2 sesiones"               ┃
+┃ Autor: Ing. Ana Martínez                             ┃
+┃                                                       ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫ ↑
+┃ ACCIONES RÁPIDAS (Sticky Bottom)                     ┃ │
+┃────────────────────────────────────────────────────────┃ │
+┃ [👁  Ver RAPS                    ]                   ┃ │
+┃ [📅 Ver Horario                 ]                   ┃ │
+┃ [📋 Registrar Observación       ]                   ┃ 120px
+┃ [📄 Ver Documentos              ]                   ┃ │
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ↓
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                         PUNTOS CLAVE DEL DISEÑO                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+🎯 ENCABEZADO STICKY
+   └─ Se queda arriba al hacer scroll
+   └─ Muestra siempre: nombre, estado, ficha, programa
+   └─ Botón X para cerrar en la esquina
+
+📄 CONTENIDO SCROLLABLE
+   └─ 5 secciones bien delimitadas
+   └─ Información clara y organizada
+   └─ Sin tabs, todo visible en un scroll
+
+🔧 ACCIONES STICKY BOTTOM
+   └─ Se queda abajo al hacer scroll
+   └─ 4 botones de acciones frecuentes
+   └─ Callbacks listos para integrar
+
+🎨 DISEÑO RESPONSIVE
+   └─ Desktop: 384px (w-96 Tailwind)
+   └─ Tablet: 384px
+   └─ Móvil: 100% del ancho
+
+🌓 TEMA OSCURO/CLARO
+   └─ Colores con dark: prefix
+   └─ Bordas oscuras en dark mode
+   └─ Texto legible en ambos temas
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                         RESPONSIVIDAD                                      │
+└────────────────────────────────────────────────────────────────────────────┘
+
+ESCRITORIO (1920px - 1280px)
+═════════════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  TABLA APRENDICES                         │ PANEL LATERAL (384px)      │
+│                                           │                             │
+│  Muestra tabla completa                   │ Panel se abre a la derecha │
+│  Usuario puede leer tabla y panel         │ Cómodo para consulta       │
+│                                           │                             │
+└──────────────────────────────────────────────────────────────────────────┘
+
+
+TABLET (768px - 1024px)
+═════════════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  TABLA REDUCIDA      │ PANEL LATERAL (384px)                           │
+│                      │                                                   │
+│  Columnas mínimas    │ Toma mucho espacio pero readable                │
+│                      │                                                   │
+└──────────────────────────────────────────────────────────────────────────┘
+
+
+MÓVIL (320px - 480px)
+═════════════════════════════════════════════════════════════════════════════
+
+Modo 1: TABLA VISIBLE (sin panel)
+┌──────────────────────────────────┐
+│  TABLA APRENDICES (100%)        │
+│                                  │
+│  ID │ Nombre │ Estado           │
+│  ─── │ ──── │ ──────           │
+│  001 │ Juan │ En Formación     │
+│  002 │ María│ En Práctica      │
+│                                  │
+│  [Hacer clic en fila]            │
+└──────────────────────────────────┘
+
+Modo 2: PANEL ABIERTO (100%)
+┌──────────────────────────────────┐
+│ X PANEL LATERAL (100%)          │
+├──────────────────────────────────┤
+│ [Avatar] Nombre                  │
+│ Estado: En Formación             │
+│ Ficha: 3014407                   │
+│ Programa: ADSO                   │
+├──────────────────────────────────┤
+│                                  │
+│ 👤 DATOS PERSONALES             │
+│ Documento: 1234567890            │
+│ ...                              │
+│                                  │
+│ [Scroll hacia abajo]             │
+│ ...                              │
+│                                  │
+│ [Ver RAPS]                       │
+│ [Ver Horario]                    │
+│ [Registrar Obs.]                 │
+│ [Ver Documentos]                 │
+└──────────────────────────────────┘
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                         INDICADORES VISUALES                                │
+└────────────────────────────────────────────────────────────────────────────┘
+
+ESTADOS DEL APRENDIZ (Badges):
+  🔵 EN FORMACIÓN    - Azul
+  🟣 EN PRÁCTICA     - Púrpura
+  🟢 CERTIFICADO     - Verde
+  🔴 RETIRADO        - Rojo
+  ⚫ CANCELADO        - Gris
+
+BARRAS DE PROGRESO:
+  Progreso Programa: ███████░░░░░░░░░░░░ 65%
+  Asistencia 85%:   ████████░░░░░░░░░░░░ 85%  (Verde)
+  Asistencia 70%:   ███████░░░░░░░░░░░░░░ 70%  (Naranja)
+  Asistencia 50%:   █████░░░░░░░░░░░░░░░░░░ 50% (Rojo)
+
+RAPS BADGES:
+  [45 Aprobados]  - Verde claro
+  [12 Pendientes] - Amarillo claro
+  [57 Total]      - Gris claro
+
+ALERTAS:
+  ⚠️  Inasistencia   - Texto rojo con fondo rojo claro
+  ⚠️  Bajo desempeño - Texto rojo con fondo rojo claro
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                         INTERACCIÓN                                         │
+└────────────────────────────────────────────────────────────────────────────┘
+
+ABRIR PANEL:
+  1. Usuario hace clic en fila de tabla
+  2. Se llama handleViewLearner(learner)
+  3. setSelectedLearner(learner)
+  4. setShowDetailPanel(true)
+  5. Panel se desliza desde la derecha
+
+CERRAR PANEL:
+  1. Usuario hace clic en X arriba
+     ↓ Se ejecuta onClose()
+  2. Usuario hace clic en overlay gris
+     ↓ Se ejecuta onClose()
+  3. Panel se desliza hacia la derecha
+  4. showDetailPanel = false
+
+NAVEGAR EN ACCIONES:
+  1. Usuario hace clic en "Ver RAPS"
+  2. Se ejecuta onViewRaps()
+  3. Navega a /learners/{id}/raps
+  4. Panel puede cerrarse automáticamente
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                   ✅ IMPLEMENTACIÓN COMPLETADA                            ║
+║                                                                            ║
+║   • LearnerSidePanel.jsx        → Componente base                         ║
+║   • LearnerSidePanelWithActions → Con callbacks                           ║
+║   • LearnersManagementPage      → Actualizada                             ║
+║   • Documentación               → Guía y ejemplos                         ║
+║   • Sin errores de compilación   → 100% listo                             ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝

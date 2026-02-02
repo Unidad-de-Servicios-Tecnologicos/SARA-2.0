@@ -3,18 +3,22 @@ import { Plus, Search, Download, Filter, AlertTriangle, TrendingUp, Users, Gradu
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/card'
-import LearnerDetailModal from '../components/LearnerDetailModal'
+import LearnerSidePanel from '../components/LearnerSidePanel'
 import LearnerFormModal from '../components/LearnerFormModal'
 import LearnerTable from '../components/LearnerTable'
+import RapsModal from '../components/RapsModal'
+import ScheduleModal from '../components/ScheduleModal'
+import ObservationModal from '../components/ObservationModal'
+import DocumentsModal from '../components/DocumentsModal'
 import { showToast, showAlert } from '@/shared/notifications'
 import { downloadReport } from '@/utils/downloadReports'
 import Swal from 'sweetalert2'
 import { mockFichas } from '@/features/records/mock/records.mock'
 
-export default function LearnersManagementPage() {
+export default function LearnersManagementPage({ initialFichaId }) {
   // Filtros de búsqueda
   const [searchDocument, setSearchDocument] = useState('')
-  const [searchFicha, setSearchFicha] = useState('')
+  const [searchFicha, setSearchFicha] = useState(initialFichaId || '')
   const [searchPrograma, setSearchPrograma] = useState('')
   const [searchEstado, setSearchEstado] = useState('')
   const [showFilters, setShowFilters] = useState(false)
@@ -23,6 +27,12 @@ export default function LearnersManagementPage() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showFormModal, setShowFormModal] = useState(false)
   const [editingLearner, setEditingLearner] = useState(null)
+  
+  // Modales de acciones rápidas
+  const [showRapsModal, setShowRapsModal] = useState(false)
+  const [showScheduleModal, setShowScheduleModal] = useState(false)
+  const [showObservationModal, setShowObservationModal] = useState(false)
+  const [showDocumentsModal, setShowDocumentsModal] = useState(false)
 
   // Mock data - en producción vendría del API
   const [learners, setLearners] = useState([
@@ -32,7 +42,7 @@ export default function LearnersManagementPage() {
       name: 'Juan Carlos López',
       email: 'juan@example.com',
       phone: '3015551234',
-      fichaId: '2889927',
+      fichaId: '2818588',
       program: 'Análisis y Desarrollo de Software',
       state: 'EN FORMACIÓN',
       academicPerformance: 'Bueno',
@@ -54,7 +64,7 @@ export default function LearnersManagementPage() {
       ],
       // Relaciones con otros módulos
       fichas: [
-        { id: '2889927', name: 'Análisis y Desarrollo de Software', startDate: '2024-02-15', endDate: '2026-02-15', estado: 'Activa', jornada: 'Diurna', trimestre: 4 }
+        { id: '2818588', name: 'Administración Empresarial', startDate: '2025-01-15', endDate: '2025-08-30', estado: 'Activa', jornada: 'Diurna', trimestre: 2 }
       ],
       practices: [],
       attendance_records: [
@@ -74,7 +84,7 @@ export default function LearnersManagementPage() {
       name: 'María Rodríguez García',
       email: 'maria@example.com',
       phone: '3015555678',
-      fichaId: '2889927',
+      fichaId: '2818588',
       program: 'Análisis y Desarrollo de Software',
       state: 'EN FORMACIÓN',
       academicPerformance: 'Excelente',
@@ -93,7 +103,7 @@ export default function LearnersManagementPage() {
         { id: 4, codigo: 'RA4', nombre: 'Aplicar buenas prácticas de calidad', competencia: 'Construir el sistema de información', estado: 'en_progreso', trimestre: 4 },
       ],
       fichas: [
-        { id: '2889927', name: 'Análisis y Desarrollo de Software', startDate: '2024-02-15', endDate: '2026-02-15', estado: 'Activa', jornada: 'Diurna', trimestre: 4 }
+        { id: '2818588', name: 'Administración Empresarial', startDate: '2025-01-15', endDate: '2025-08-30', estado: 'Activa', jornada: 'Diurna', trimestre: 2 }
       ],
       practices: [],
       attendance_records: [
@@ -112,7 +122,7 @@ export default function LearnersManagementPage() {
       name: 'Carlos Pérez Martínez',
       email: 'carlos@example.com',
       phone: '3015559999',
-      fichaId: '2889929',
+      fichaId: '2818589',
       program: 'Gestión Administrativa',
       state: 'CERTIFICADO',
       academicPerformance: 'Bueno',
@@ -126,7 +136,7 @@ export default function LearnersManagementPage() {
       fichaState: 'finalizada',
       raps: [],
       fichas: [
-        { id: '2889929', name: 'Gestión Administrativa', startDate: '2023-08-15', endDate: '2025-08-15', estado: 'En Etapa Productiva', jornada: 'Mixta', trimestre: 7 }
+        { id: '2818589', name: 'Gestión Logística', startDate: '2025-01-20', endDate: '2025-09-15', estado: 'Activa', jornada: 'Nocturna', trimestre: 1 }
       ],
       practices: [
         { id: 3, company: 'Bancolombia S.A.', startDate: '2025-03-15', endDate: '2025-09-15', estado: 'En Proceso', supervisor: 'Claudia Campuzano', tipo: 'Contrato de Aprendizaje' }
@@ -150,7 +160,7 @@ export default function LearnersManagementPage() {
       name: 'Ana Sofía Mendoza',
       email: 'ana@example.com',
       phone: '3015554321',
-      fichaId: '2889928',
+      fichaId: '2818590',
       program: 'Producción Multimedia',
       state: 'CONDICIONADO',
       academicPerformance: 'Regular',
@@ -168,7 +178,7 @@ export default function LearnersManagementPage() {
         { id: 3, codigo: 'RA3', nombre: 'Editar productos multimedia', competencia: 'Producción multimedia', estado: 'no_aprobado', trimestre: 3 },
       ],
       fichas: [
-        { id: '2889928', name: 'Producción Multimedia', startDate: '2024-03-01', endDate: '2026-03-01', estado: 'Activa', jornada: 'Nocturna', trimestre: 3 }
+        { id: '2818590', name: 'Contabilización de Operaciones', startDate: '2024-11-01', endDate: '2025-05-30', estado: 'Activa', jornada: 'Diurna', trimestre: 3 }
       ],
       practices: [],
       attendance_records: [
@@ -470,6 +480,23 @@ export default function LearnersManagementPage() {
     }
   }
 
+  // Handlers para los modales de acciones rápidas
+  const handleViewRaps = () => {
+    setShowRapsModal(true)
+  }
+
+  const handleViewSchedule = () => {
+    setShowScheduleModal(true)
+  }
+
+  const handleRegisterObservation = () => {
+    setShowObservationModal(true)
+  }
+
+  const handleViewDocuments = () => {
+    setShowDocumentsModal(true)
+  }
+
   const clearFilters = () => {
     setSearchDocument('')
     setSearchFicha('')
@@ -721,12 +748,15 @@ export default function LearnersManagementPage() {
         onDelete={handleDeleteLearner}
       />
 
-      {/* Modal de detalle */}
-      <LearnerDetailModal
+      {/* Panel lateral de detalle */}
+      <LearnerSidePanel
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
         learner={selectedLearner}
-        onEdit={() => handleEditLearner(selectedLearner)}
+        onViewRaps={handleViewRaps}
+        onViewSchedule={handleViewSchedule}
+        onRegisterObservation={handleRegisterObservation}
+        onViewDocuments={handleViewDocuments}
       />
 
       {/* Modal de formulario */}
@@ -738,6 +768,31 @@ export default function LearnersManagementPage() {
         }}
         learner={editingLearner}
         onSave={handleSaveLearner}
+      />
+
+      {/* Modales de acciones rápidas */}
+      <RapsModal
+        isOpen={showRapsModal}
+        onClose={() => setShowRapsModal(false)}
+        learner={selectedLearner}
+      />
+
+      <ScheduleModal
+        isOpen={showScheduleModal}
+        onClose={() => setShowScheduleModal(false)}
+        learner={selectedLearner}
+      />
+
+      <ObservationModal
+        isOpen={showObservationModal}
+        onClose={() => setShowObservationModal(false)}
+        learner={selectedLearner}
+      />
+
+      <DocumentsModal
+        isOpen={showDocumentsModal}
+        onClose={() => setShowDocumentsModal(false)}
+        learner={selectedLearner}
       />
     </div>
   )
